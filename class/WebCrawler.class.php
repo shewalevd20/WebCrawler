@@ -26,6 +26,11 @@ class WebCrawler {
         $this->seed_url = $seed_url;
     }
 
+    public function crawl($seed_url) {
+        $seed_url = $this->seed_url;
+        
+    }
+
     public function addPage($webPage) {
         array_push($this->pages, $webPage);
     }

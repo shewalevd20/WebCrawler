@@ -9,9 +9,11 @@
 class WebPage {
 
     private $url;
+    private $content;
     private $host;
     private $visited;
     private $type;
+    private $linkedPages = array();
 
     function __construct($url, $host) {
         $this->url = $url;
@@ -23,7 +25,17 @@ class WebPage {
     }
 
     function fetchPage() {
-        
+        $opts = array(
+            'http' => array(
+                'method' => "GET",
+                'type' => "text/html")
+        );
+        $context = stream_context_create($opts);
+
+        $this->content = file_get_contents($this->url, false, $context);
+        $this->visited = true;
+
+        return $this->content;
     }
 
     // Accessors
