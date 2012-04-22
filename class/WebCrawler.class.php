@@ -18,10 +18,9 @@ class WebCrawler {
     private $politeness;
     private $maxpages;
     private $seed_url;
-    
     private $pages = array();
 
-    function WebCrawler($politeness = DEFAULT_POLITENESS, $maxpages = MAX_PAGES, $seed_url = DEFAULT_SEED) {
+    function __construct($politeness = DEFAULT_POLITENESS, $maxpages = MAX_PAGES, $seed_url = DEFAULT_SEED) {
         $this->politeness = $politeness;
         $this->maxpages = $maxpages;
         $this->seed_url = $seed_url;
@@ -30,7 +29,7 @@ class WebCrawler {
     public function addPage($webPage) {
         array_push($this->pages, $webPage);
     }
-    
+
     public function getAllPages() {
         return $this->pages;
     }

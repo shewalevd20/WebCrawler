@@ -1,6 +1,5 @@
 <?php
 
-
 /**
  * WebPage Class representation
  *
@@ -13,25 +12,37 @@ class WebPage {
     private $host;
     private $visited;
     private $type;
-    
-    function WebPage($url, $host) {
+
+    function __construct($url, $host) {
         $this->url = $url;
         $this->host = $host;
     }
-    
+
     function openUrl() {
         
     }
-    
+
     function fetchPage() {
         
     }
-    
-    public function getUrl(){return $this->url;}
-    public function getHost(){return $this->host;}
-    public function getType(){return $this->type;}
-    public function isVisited(){return $this->visited;}
-        
+
+    // Accessors
+    public function getUrl() {
+        return $this->url;
+    }
+
+    public function getHost() {
+        return $this->host;
+    }
+
+    public function getType() {
+        return $this->type;
+    }
+
+    public function isVisited() {
+        return $this->visited;
+    }
+
 }
 
 ?>
