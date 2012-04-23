@@ -8,7 +8,8 @@ require_once 'class/WebCrawler.class.php';
 $cli = array();
 try {
     $cli = readCLI();
-    
+    if (isset($cli["help"]))
+        print_help();
 } catch (CLIException $exc) {
     print_r($exc->getMessage());
     print_help();
