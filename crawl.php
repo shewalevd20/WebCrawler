@@ -1,14 +1,17 @@
 <?php
 
 include_once 'inc/readCLI.php';
+include_once 'inc/print_help.php';
 require_once 'class/WebPage.class.php';
 require_once 'class/WebCrawler.class.php';
 
 $cli = array();
 try {
     $cli = readCLI();
+    
 } catch (CLIException $exc) {
     print_r($exc->getMessage());
+    print_help();
     die();
 }
 
