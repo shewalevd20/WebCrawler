@@ -1,6 +1,6 @@
 <?php
 
-require_once 'class/exceptions/CLIException.class.php';
+require_once 'class/exceptions/cli/NoSeedUrlException.class.php';
 
 function readCLI() {
     $shortopts = "";
@@ -16,7 +16,7 @@ function readCLI() {
         "seed_url" => $options["seed_url"],
         "help" => $options["help"]);
     if (!isset($cli['seed_url'])) {
-        throw new CLIException("You must specify 'seed_url' in order to start crawling (Usage: '--seed_url='VALUE')\n");
+        throw new NOSeedUrlException("You must specify 'seed_url' in order to start crawling (Usage: '--seed_url='VALUE')\n");
     }
     var_dump($cli);
     return $cli;

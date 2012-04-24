@@ -10,7 +10,7 @@ try {
     $cli = readCLI();
     if (isset($cli["help"]))
         print_help();
-} catch (CLIException $exc) {
+} catch (NOSeedUrlException $exc) {
     print_r($exc->getMessage());
     print_help();
     die();
