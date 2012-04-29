@@ -2,7 +2,7 @@
 
 include_once 'inc/readCLI.php';
 include_once 'inc/print_help.php';
-include_once('inc/simple_html_dom.php');
+include_once 'inc/simple_html_dom.php';
 require_once 'class/WebPage.class.php';
 require_once 'class/WebCrawler.class.php';
 
@@ -27,4 +27,6 @@ $page->fetchPage();
 echo "\nCrawler started...\n";
 
 echo "Crawler finished.\n";
+$pages = $crawler->getVisitedPages();
+include_once 'index.php';
 ?>

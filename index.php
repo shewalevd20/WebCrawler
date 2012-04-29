@@ -10,18 +10,21 @@
                     <th>Is this a mobile article</th>
                 </tr>
                 <?php
+                $counter = 0;
                 foreach ($pages as $page) {
                     ?>
                     <tr>
                         <td>
                             <a href="<?php echo $page->getUrl() ?>"><?php echo $page->getUrl() ?></a>
+                            <input type="hidden" name="url[]" value="<?php echo $page->getUrl() ?>"/>
                         </td>
                         <td>
-                            <input type="radio" name="isMobile" value="1" <?php if($page->isMobileArticle()){echo 'checked';}?>/>Yes
-                            <input type="radio" name="isMobile" value="0" <?php if(!$page->isMobileArticle()){echo 'checked';}?>/>No
+                            <input type="radio" name="isMobile[<?php echo $counter; ?>]" value="1" <?php if($page->isMobileArticle()){echo 'checked';}?>/>Yes
+                            <input type="radio" name="isMobile[<?php echo $counter; ?>]" value="0" <?php if(!$page->isMobileArticle()){echo 'checked';}?>/>No
                         </td>
                     </tr>
                     <?php
+                    $counter++;
                 }
                 ?>
             </table>
