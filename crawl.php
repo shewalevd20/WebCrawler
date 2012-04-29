@@ -28,5 +28,7 @@ echo "\nCrawler started...\n";
 
 echo "Crawler finished.\n";
 $pages = $crawler->getVisitedPages();
-include_once 'index.php';
+
+exec("open ".BASE_URL."index.php");
+//include_once 'index.php';
 ?>

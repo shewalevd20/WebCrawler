@@ -15,6 +15,7 @@ define("DEFAULT_POLITENESS", 30);
 define("URL_OCCURRENCE_WEIGHT",0.5);
 define("ARTICLE_THRESHOLD",0.625);
 define("OCCURRENCE_THRESHOLD",10);
+define("BASE_URL",'http://localhost:8888/WebCrawler/');
 
 class WebCrawler {
 
