@@ -20,11 +20,11 @@ try {
 // Create new crawler (pass cli into that)
 $crawler = new WebCrawler($cli["politeness"], $cli["maxpages"], $cli["seed_url"]);
 
-$page = new WebPage($cli["seed_url"], "");
-$page->fetchPage();
+//$page = new WebPage($cli["seed_url"], "");
+//$page->fetchPage();
 
 // Start crawling here
-echo "Crawler started...\n";
-
-echo "Crawler finished.\n";
+echo "\nCrawler started...\n";
+$crawler->start();
+echo "Crawler finished.\n\n";
 ?>

@@ -15,27 +15,15 @@ class WebPage {
     private $type;
     private $mobile_article;
     private $linkedPages = array();
-
+    
     function __construct($url, $host) {
         $this->url = $url;
         $this->host = $host;
     }
 
-    function openUrl() {
-        
-    }
-
     function fetchPage() {
-        $opts = array(
-            'http' => array(
-                'method' => "GET",
-                'type' => "text/html")
-        );
-        $context = stream_context_create($opts);
-
         $this->content = file_get_contents($this->url, false, $context);
         $this->visited = true;
-        
         
         // Code to check whether the page is a mobile page or not 
         // ** still needs a lot of modifications **
@@ -54,6 +42,43 @@ class WebPage {
         return $this->content;
     }
 
+    public function getAllPageLinks() {
+        $html = file_get_html($this->url);
+        $anchors = $html->find('a');
+        foreach ($anchors as $anchor) {
+            $href = $anchor->href;
+            if (substr($href, 0, 4) == "http") {
+                if ($this->sameHost($href)){
+                    $href = $this->checkAnchors($href);
+                    array_push($this->linkedPages, $href);
+                }
+                
+            }
+        }
+        $this->linkedPages = array_unique($this->linkedPages);
+        
+        return $this->linkedPages;
+    }
+    
+    private function sameHost($url) {
+        $pizza = $url;
+        $pieces = explode("/", $pizza);
+        $host = $pieces[2];
+        //echo ("\nLink Host: " . $host . " Host: " . $this->host . "\n");
+        return ($host == $this->host);
+    }
+    
+    private function checkAnchors($href) {
+        $cleanHref = explode("#", $href);
+        //var_dump($cleanHref);
+        if ($cleanHref)
+            return $cleanHref[0];
+        else
+            return $href;
+    }
+    
+    
+    
     // Accessors
     public function getUrl() {
         return $this->url;
