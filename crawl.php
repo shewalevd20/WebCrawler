@@ -24,7 +24,7 @@ $page = new WebPage($cli["seed_url"], "");
 $page->fetchPage();
 
 // Start crawling here
-echo "Crawler started...\n";
+echo "\nCrawler started...\n";
 
 echo "Crawler finished.\n";
 ?>
