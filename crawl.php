@@ -2,7 +2,7 @@
 
 include_once 'inc/readCLI.php';
 include_once 'inc/print_help.php';
-include_once('inc/simple_html_dom.php');
+include_once 'inc/simple_html_dom.php';
 require_once 'class/WebPage.class.php';
 require_once 'class/WebCrawler.class.php';
 
@@ -27,4 +27,8 @@ $crawler = new WebCrawler($cli["politeness"], $cli["maxpages"], $cli["seed_url"]
 echo "\nCrawler started...\n";
 $crawler->start();
 echo "Crawler finished.\n\n";
+
+$pages = $crawler->getVisitedPages();
+exec("open ".BASE_URL."index.php");
+//include_once 'index.php';
 ?>

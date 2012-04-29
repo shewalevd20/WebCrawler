@@ -16,6 +16,11 @@ class WebPage {
     private $mobile_article;
     private $linkedPages = array();
     
+    private $keywords = array(  "mobile"=>array("text"=>0, "url"=>0, "weight"=>0.125), 
+                                "android"=>array("text"=>0, "url"=>0, "weight"=>0.125),
+                                "ios"=>array("text"=>0, "url"=>0, "weight"=>0.125),
+                                "phone"=>array("text"=>0, "url"=>0, "weight"=>0.125));
+
     function __construct($url, $host) {
         $this->url = $url;
         $this->host = $host;
@@ -38,6 +43,8 @@ class WebPage {
         }
 
         // end of mobile checking
+        $this->mobile_article = $this->checkArticleTopic();
+        print_r($this->mobile_article?'Is Mobile' : 'Not Mobile');
 
         return $this->content;
     }
@@ -99,6 +106,38 @@ class WebPage {
     public function isMobileArticle() {
         return $this->mobile;
     }
+    
+    // Code to check whether the page is a mobile page or not 
+    // ** still needs a lot of modifications **
+    private function checkArticleTopic(){
+        
+        $plainText = file_get_html($this->url)->plaintext;
+        $weight = 0;
+        $inURL = FALSE;
+        foreach($this->keywords as $key=>$value){
+            $value["text"] = substr_count(strtolower($plainText), $key);
+            $value["url"] = substr_count(strtolower($this->url), $key);
+            
+            if($value["text"] > OCCURRENCE_THRESHOLD){
+                $weight += $value['weight'];
+            }
+            
+            if($value['url']>0){
+                $inURL = TRUE;
+            }
+            
+            $this->keywords[$key] = $value;
+        }
+        print_r($this->keywords);
+        if($inURL){
+            $weight += URL_OCCURRENCE_WEIGHT;
+        }
+        
+        print_r("\n{$weight}\n");
+        
+        return ($weight > ARTICLE_THRESHOLD);
+    }
+    // end of mobile checking
 }
 
 ?>

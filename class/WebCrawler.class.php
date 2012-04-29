@@ -13,6 +13,10 @@ require_once 'inc/simple_html_dom.php';
 define("MAX_PAGES", 20);
 define("DEFAULT_SEED", "");
 define("DEFAULT_POLITENESS", 30);
+define("URL_OCCURRENCE_WEIGHT",0.5);
+define("ARTICLE_THRESHOLD",0.625);
+define("OCCURRENCE_THRESHOLD",10);
+define("BASE_URL",'http://localhost:8888/WebCrawler/');
 
 class WebCrawler {
 
