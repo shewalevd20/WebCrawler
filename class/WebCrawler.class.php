@@ -53,9 +53,7 @@ class WebCrawler {
             }
         }
         
-        if (count($this->visited) < $this->maxpages)
-            
-            $this->crawl();
+        if (count($this->visited) < $this->maxpages)            
         var_dump($this->links);
     }
 
@@ -71,7 +69,7 @@ class WebCrawler {
         array_push($this->pages, $webPage);
     }
 
-    public function getVisitedPages() {
+    public static function getVisitedPages() {
         $visitedPages = array();
         // TODO
         return $visitedPages;
@@ -86,7 +84,6 @@ class WebCrawler {
     public function getPageByIndex($index) {
         return $this->pages[$index];
     }
-
 }
 
 ?>
