@@ -58,6 +58,7 @@ class WebCrawler {
     public function getPageByIndex($index) {
         return $this->pages[$index];
     }
+
 }
 
 ?>
