@@ -24,9 +24,11 @@ class WebCrawler {
     private $maxpages;
     private $seed_url;
     private $host;
+    
     private $pages = array();
-    private $visited = array();
-    private $links = array();
+    private $visitedPages = array();
+    private $visitedLinks = array();
+    
 
     function __construct($politeness = DEFAULT_POLITENESS, $maxpages = MAX_PAGES, $seed_url = DEFAULT_SEED) {
         $this->politeness = $politeness;
@@ -36,27 +38,24 @@ class WebCrawler {
     }
 
     public function start() {
-       $this->crawl($this->seed_url);
+        $this->crawl($this->seed_url);
+        var_dump($this->visitedLinks);
     }
     
     private function crawl($url) {
-        $newPage = new WebPage($url, $this->host);
-        $this->addPage($newPage);   
-        $this->visited[] = $newPage->getUrl();
-        foreach($newPage->getAllPageLinks() as $link){
-            $this->links[] = $link;
-        }
-        for($i=0; $i<count($links) && count($this->visited) < $this->maxpages; $i++){
-            $url = $links[$i];
-            if(!in_array($url, $this->visited)){
-                $this->crawl($url);
-            }
-        }
-        
-        if (count($this->visited) < $this->maxpages)
+        //echo "\nCrawling inside: " . $url . " Visited:" . count($this->visitedPages) . " Max: " . $this->maxpages . "\n" ;
+        if ((count($this->visitedPages) < $this->maxpages))
+        {
+            $page = new WebPage($url, $this->host);
+            $this->visitedPages[] = $page;
+            $this->visitedLinks[] = $url;
             
-            $this->crawl();
-        var_dump($this->links);
+            foreach ($page->getAllPageLinks() as $link) {
+                if (!in_array($link, $this->visitedLinks)){
+                    $this->crawl($link);
+                }
+            }
+        }      
     }
 
     private function getHost(){
@@ -64,11 +63,6 @@ class WebCrawler {
         $pieces = explode("/", $pizza);
         echo ("Host: " . $pieces[2] . "\n");
         return $pieces[2];
-    }
-
-
-    public function addPage($webPage) {
-        array_push($this->pages, $webPage);
     }
 
     public function getVisitedPages() {

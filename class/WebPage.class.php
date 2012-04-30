@@ -24,6 +24,7 @@ class WebPage {
     function __construct($url, $host) {
         $this->url = $url;
         $this->host = $host;
+        $this->visited = false;
     }
 
     function fetchPage() {
@@ -50,9 +51,13 @@ class WebPage {
     }
 
     public function getAllPageLinks() {
+        echo $this->url . "\n";
         $html = file_get_html($this->url);
+        echo "\nGET_ALL_LINKS\n";
         $anchors = $html->find('a');
+        echo "Anchors: " . count($anchors) . "\n";        
         foreach ($anchors as $anchor) {
+            
             $href = $anchor->href;
             if (substr($href, 0, 4) == "http") {
                 if ($this->sameHost($href)){
@@ -62,6 +67,7 @@ class WebPage {
                 
             }
         }
+
         $this->linkedPages = array_unique($this->linkedPages);
         
         return $this->linkedPages;
@@ -71,7 +77,6 @@ class WebPage {
         $pizza = $url;
         $pieces = explode("/", $pizza);
         $host = $pieces[2];
-        //echo ("\nLink Host: " . $host . " Host: " . $this->host . "\n");
         return ($host == $this->host);
     }
     
@@ -105,6 +110,10 @@ class WebPage {
     
     public function isMobileArticle() {
         return $this->mobile;
+    }
+    
+    public function setVisited() {
+        $this->visited = true;
     }
     
     // Code to check whether the page is a mobile page or not 

@@ -18,7 +18,7 @@ function readCLI() {
     if (!isset($cli['seed_url'])) {
         throw new NOSeedUrlException("You must specify 'seed_url' in order to start crawling (Usage: '--seed_url='VALUE')\n");
     }
-    var_dump($cli);
+    //var_dump($cli);
     return $cli;
 }
 

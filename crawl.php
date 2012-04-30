@@ -30,5 +30,5 @@ echo "Crawler finished.\n\n";
 
 $pages = $crawler->getVisitedPages();
 exec("open ".BASE_URL."index.php");
-//include_once 'index.php';
+include_once 'index.php';
 ?>
