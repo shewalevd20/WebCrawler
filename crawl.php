@@ -37,9 +37,9 @@ echo "\nCrawler started...\n";
 $crawler->start();
 echo "Crawler finished.\n\n";
 
-//$pages = $crawler->getVisitedPages();
-//WebCrawler::writeToFile("links", $pages);
-//generateWekaFile();
-//exec("open " . BASE_URL . "index.php");
+$pages = $crawler->getVisitedPages();
+WebCrawler::writeToFile("links", $pages);
+generateWekaFile();
+exec("open " . BASE_URL . "index.php");
 
 ?>
