@@ -1,5 +1,11 @@
 <?php
 
+/**
+ * RMIT
+ * @author Daniel Stankevich
+ * @author Karim Ainine
+ */
+
 require_once 'class/exceptions/cli/NoSeedUrlException.class.php';
 
 function readCLI() {

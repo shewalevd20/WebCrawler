@@ -29,6 +29,7 @@ class WebCrawler {
     private $visitedPages = array();
     private $visitedLinks = array();
     
+    private $start_time;
 
     function __construct($politeness = DEFAULT_POLITENESS, $maxpages = MAX_PAGES, $seed_url = DEFAULT_SEED) {
         $this->politeness = $politeness;
@@ -38,13 +39,15 @@ class WebCrawler {
     }
 
     public function start() {
+        $this->start_time = time();
+        var_dump($this->start_time);
         $this->crawl($this->seed_url);
         var_dump($this->visitedLinks);
     }
     
     private function crawl($url) {
-        echo "\nCrawling inside: " . $url . " Visited:" . count($this->visitedPages) . " Max: " . $this->maxpages . "\n" ;
-        if ((count($this->visitedPages) < $this->maxpages))
+        $currentTime = time();
+        if ((count($this->visitedPages) < $this->maxpages) && ((time() - $this->start_time) <= $this->politeness))
         {
             $page = new WebPage($url, $this->host);
             $this->visitedPages[] = $page;
@@ -65,26 +68,6 @@ class WebCrawler {
         return $pieces[2];
     }
 
-
-    public function addPage($webPage) {
-        array_push($this->pages, $webPage);
-    }
-
-    public static function getVisitedPages() {
-        $visitedPages = array();
-        // TODO
-        return $visitedPages;
-    }
-
-    public function getUnVisitedPages() {
-        $unVisitedPages = array();
-        // TODO
-        return $unVisitedPages;
-    }
-
-    public function getPageByIndex($index) {
-        return $this->pages[$index];
-    }
 }
 
 ?>

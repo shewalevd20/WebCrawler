@@ -50,27 +50,38 @@ class WebPage {
         return $this->content;
     }
 
-    public function getAllPageLinks() {
-        echo $this->url . "\n";
-        $html = file_get_html($this->url);
-        echo "\nGET_ALL_LINKS\n";
-        $anchors = $html->find('a');
-        echo "Anchors: " . count($anchors) . "\n";        
-        foreach ($anchors as $anchor) {
-            
-            $href = $anchor->href;
+    public function getAllPageLinks() {        
+        $anchors = $this->getAllAnchors(file_get_contents($this->url));
+        foreach ($anchors as $anchor) { 
+            $href = $anchor;
             if (substr($href, 0, 4) == "http") {
                 if ($this->sameHost($href)){
                     $href = $this->checkAnchors($href);
                     array_push($this->linkedPages, $href);
-                }
-                
+                }   
             }
         }
-
         $this->linkedPages = array_unique($this->linkedPages);
-        
         return $this->linkedPages;
+    }
+    
+    private function getAllAnchors($html) {
+        $anchors = array();
+
+        
+        for ($i=0; $i < strlen($html); $i++) {
+            if ($html[$i] == '<' && $html[$i+1] == 'a') {
+                $href = "";
+                while (substr($html, $i++, 4) != "href");
+                while ($html[$i] != "\'" && $html[$i] != "\"") $i++;
+                $i++;
+                while ($html[$i] != "\'" && $html[$i] != "\"")
+                   $href .= $html[$i++];
+                $anchors[] = $href;
+            }       
+        }
+        return $anchors;
+        //var_dump($anchors);
     }
     
     private function sameHost($url) {
