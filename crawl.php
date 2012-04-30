@@ -20,15 +20,16 @@ try {
 // Create new crawler (pass cli into that)
 $crawler = new WebCrawler($cli["politeness"], $cli["maxpages"], $cli["seed_url"]);
 
-//$page = new WebPage($cli["seed_url"], "");
-//$page->fetchPage();
-
-// Start crawling here
+//Start crawling here
 echo "\nCrawler started...\n";
 $crawler->start();
 echo "Crawler finished.\n\n";
 
+
 $pages = $crawler->getVisitedPages();
-exec("open ".BASE_URL."index.php");
-include_once 'index.php';
+
+//include_once 'index.php';
+//
+//exec("open " . BASE_URL . "index.php");
+
 ?>

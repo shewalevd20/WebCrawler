@@ -1,3 +1,9 @@
+<?php
+require_once 'class/WebPage.class.php';
+require_once 'class/WebCrawler.class.php';
+
+$pages = WebCrawler::getVisitedPages();
+?>
 <html>
     <head>
         <title>Web Crawler - Articles</title>

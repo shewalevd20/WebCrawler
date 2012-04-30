@@ -43,7 +43,7 @@ class WebCrawler {
     }
     
     private function crawl($url) {
-        //echo "\nCrawling inside: " . $url . " Visited:" . count($this->visitedPages) . " Max: " . $this->maxpages . "\n" ;
+        echo "\nCrawling inside: " . $url . " Visited:" . count($this->visitedPages) . " Max: " . $this->maxpages . "\n" ;
         if ((count($this->visitedPages) < $this->maxpages))
         {
             $page = new WebPage($url, $this->host);
@@ -65,7 +65,12 @@ class WebCrawler {
         return $pieces[2];
     }
 
-    public function getVisitedPages() {
+
+    public function addPage($webPage) {
+        array_push($this->pages, $webPage);
+    }
+
+    public static function getVisitedPages() {
         $visitedPages = array();
         // TODO
         return $visitedPages;
@@ -80,7 +85,6 @@ class WebCrawler {
     public function getPageByIndex($index) {
         return $this->pages[$index];
     }
-
 }
 
 ?>

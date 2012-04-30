@@ -16,7 +16,7 @@ class WebPage {
     private $mobile_article;
     private $linkedPages = array();
     
-    private $keywords = array(  "mobile"=>array("text"=>0, "url"=>0, "weight"=>0.125), 
+    private static $keywords = array(  "mobile"=>array("text"=>0, "url"=>0, "weight"=>0.125), 
                                 "android"=>array("text"=>0, "url"=>0, "weight"=>0.125),
                                 "ios"=>array("text"=>0, "url"=>0, "weight"=>0.125),
                                 "phone"=>array("text"=>0, "url"=>0, "weight"=>0.125));
@@ -123,7 +123,7 @@ class WebPage {
         $plainText = file_get_html($this->url)->plaintext;
         $weight = 0;
         $inURL = FALSE;
-        foreach($this->keywords as $key=>$value){
+        foreach(self::$keywords as $key=>$value){
             $value["text"] = substr_count(strtolower($plainText), $key);
             $value["url"] = substr_count(strtolower($this->url), $key);
             
@@ -135,14 +135,14 @@ class WebPage {
                 $inURL = TRUE;
             }
             
-            $this->keywords[$key] = $value;
+            self::$keywords[$key] = $value;
         }
-        print_r($this->keywords);
+        print_r(self::$keywords);
         if($inURL){
             $weight += URL_OCCURRENCE_WEIGHT;
         }
         
-        print_r("\n{$weight}\n");
+        print_r("\nWeight: {$weight}\n");
         
         return ($weight > ARTICLE_THRESHOLD);
     }
