@@ -39,7 +39,7 @@ class WebCrawler {
 
     public function start() {
         $this->crawl($this->seed_url);
-        var_dump($this->visitedLinks);
+        var_dump($this->visitedPages);
     }
     
     private function crawl($url) {
@@ -48,6 +48,7 @@ class WebCrawler {
         {
             $page = new WebPage($url, $this->host);
             $this->visitedPages[] = $page;
+            $page->checkArticleTopic();
             $this->visitedLinks[] = $url;
             
             foreach ($page->getAllPageLinks() as $link) {
@@ -70,20 +71,22 @@ class WebCrawler {
         array_push($this->pages, $webPage);
     }
 
-    public static function getVisitedPages() {
-        $visitedPages = array();
-        // TODO
-        return $visitedPages;
+    public function getVisitedPages() {
+        return $this->visitedPages;
     }
-
-    public function getUnVisitedPages() {
-        $unVisitedPages = array();
-        // TODO
-        return $unVisitedPages;
-    }
-
-    public function getPageByIndex($index) {
-        return $this->pages[$index];
+    
+    public static function writeToFile($filename, $pages) {
+        $file_content = "";
+        $counter = 0;
+        foreach ($pages as $page) {
+            if ($counter == 0) {
+                $file_content .= $page->getUrl() . ',' . $page->isMobileArticle();
+            } else {
+                $file_content .= "\n" . $page->getUrl() . ',' . $page->isMobileArticle();
+            }
+            $counter++;
+        }
+        file_put_contents($filename, $file_content);
     }
 }
 
