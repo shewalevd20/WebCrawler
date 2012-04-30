@@ -116,7 +116,7 @@ class WebPage {
     // ** still needs a lot of modifications **
     public function checkArticleTopic() {
 
-        $plainText = file_get_html($this->url)->plaintext;
+        $plainText = strip_tags(file_get_contents($this->url)); //file_get_html($this->url)->plaintext;
         $weight = 0;
         $inURL = FALSE;
         foreach (self::$keywords as $key => $value) {
@@ -133,7 +133,6 @@ class WebPage {
 
             self::$keywords[$key] = $value;
         }
-        print_r(self::$keywords);
         if ($inURL) {
             $weight += URL_OCCURRENCE_WEIGHT;
         }

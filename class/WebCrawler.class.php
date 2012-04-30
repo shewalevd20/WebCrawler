@@ -39,7 +39,6 @@ class WebCrawler {
 
     public function start() {
         $this->crawl($this->seed_url);
-        var_dump($this->visitedPages);
     }
     
     private function crawl($url) {
@@ -47,8 +46,8 @@ class WebCrawler {
         if ((count($this->visitedPages) < $this->maxpages))
         {
             $page = new WebPage($url, $this->host);
-            $this->visitedPages[] = $page;
             $page->checkArticleTopic();
+            $this->visitedPages[] = $page;
             $this->visitedLinks[] = $url;
             
             foreach ($page->getAllPageLinks() as $link) {
