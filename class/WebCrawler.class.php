@@ -42,7 +42,7 @@ class WebCrawler {
         $this->start_time = time();
         var_dump($this->start_time);
         $this->crawl($this->seed_url);
-        var_dump($this->visitedLinks);
+        //var_dump($this->visitedLinks);
     }
     
     private function crawl($url) {
@@ -50,6 +50,7 @@ class WebCrawler {
         if ((count($this->visitedPages) < $this->maxpages) && ((time() - $this->start_time) <= $this->politeness))
         {
             $page = new WebPage($url, $this->host);
+            $page->checkArticleTopic();
             $this->visitedPages[] = $page;
             $this->visitedLinks[] = $url;
             
@@ -68,6 +69,27 @@ class WebCrawler {
         return $pieces[2];
     }
 
+    public function addPage($webPage) {
+        array_push($this->pages, $webPage);
+    }
+
+    public function getVisitedPages() {
+        return $this->visitedPages;
+    }
+    
+    public static function writeToFile($filename, $pages) {
+        $file_content = "";
+        $counter = 0;
+        foreach ($pages as $page) {
+            if ($counter == 0) {
+                $file_content .= $page->getUrl() . ',' . $page->isMobileArticle();
+            } else {
+                $file_content .= "\n" . $page->getUrl() . ',' . $page->isMobileArticle();
+            }
+            $counter++;
+        }
+        file_put_contents($filename, $file_content);
+    }
 }
 
 ?>
