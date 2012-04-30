@@ -82,9 +82,9 @@ class WebCrawler {
         $counter = 0;
         foreach ($pages as $page) {
             if ($counter == 0) {
-                $file_content .= $page->getUrl() . ',' . $page->isMobileArticle();
+                $file_content .= $page->getUrl() . ',' . ($page->isMobileArticle()?'1':'0');
             } else {
-                $file_content .= "\n" . $page->getUrl() . ',' . $page->isMobileArticle();
+                $file_content .= "\n" . $page->getUrl() . ',' . ($page->isMobileArticle()?'1':'0');
             }
             $counter++;
         }

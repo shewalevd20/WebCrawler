@@ -96,7 +96,7 @@ class WebPage {
     }
 
     public function isMobileArticle() {
-        return $this->mobile;
+        return $this->mobile_article;
     }
 
     public function setVisited() {
@@ -127,7 +127,7 @@ class WebPage {
             $weight += URL_OCCURRENCE_WEIGHT;
         }
 
-        print_r("\nWeight: {$weight}\n");
+        //print_r("\nWeight: {$weight}\n");
 
         $this->mobile_article = ($weight > ARTICLE_THRESHOLD);
     }
