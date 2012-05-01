@@ -6,3 +6,6 @@ nbdist/
 nbactions.xml
 nb-configuration.xml
 nbproject
+
+# Project specific ignore files
+*.arrf
