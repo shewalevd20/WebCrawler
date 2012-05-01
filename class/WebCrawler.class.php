@@ -1,17 +1,20 @@
 <?php
 
-/**
- * WebCrawler Class representation
- *
- * @author Daniel Stankevich
- * @author Karim Ainine
+/*
+ * RMIT University | School of Computer Science & IT
+ * COSC 1165 / 1167 — Intelligent Web Systems 
+ * Assignment 2 | Web Crawler and Mining
+ * 
+ * @author Karim Abulainine  s3314713
+ * @author Daniel Stankevich s3336691
  */
+
 require_once 'WebPage.class.php';
 require_once 'inc/simple_html_dom.php';
 
-// Defines
+// Crawler constants
 define("MAX_PAGES", 20);
-define("DEFAULT_SEED", "");
+define("DEFAULT_SEED", "http://www.theage.com.au/digital-life/");
 define("DEFAULT_POLITENESS", 30);
 define("URL_OCCURRENCE_WEIGHT",0.5);
 define("ARTICLE_THRESHOLD",0.625);
@@ -31,6 +34,7 @@ class WebCrawler {
     
     private $start_time;
 
+    // Main WebCrawler Class constructor
     function __construct($politeness = DEFAULT_POLITENESS, $maxpages = MAX_PAGES, $seed_url = DEFAULT_SEED) {
         $this->politeness = $politeness;
         $this->maxpages = $maxpages;
@@ -40,12 +44,12 @@ class WebCrawler {
 
     public function start() {
         $this->start_time = time();
-        var_dump($this->start_time);
-        $this->crawl($this->seed_url);
-        //var_dump($this->visitedLinks);
+        $this->crawl_dfs($this->seed_url);
+        print_r("\nTotal fetched: " . count($this->visitedPages) . " pages.");
     }
     
-    private function crawl($url) {
+    // DFS based crawler function
+    private function crawl_dfs($url) {
         $currentTime = time();
         if ((count($this->visitedPages) < $this->maxpages) && ((time() - $this->start_time) <= $this->politeness))
         {
@@ -54,9 +58,11 @@ class WebCrawler {
             $this->visitedPages[] = $page;
             $this->visitedLinks[] = $url;
             
+            print_r("\nFetching: " . $url);
+            
             foreach ($page->getAllPageLinks() as $link) {
                 if (!in_array($link, $this->visitedLinks)){
-                    $this->crawl($link);
+                    $this->crawl_dfs($link);
                 }
             }
         }      
@@ -76,6 +82,8 @@ class WebCrawler {
     public function getVisitedPages() {
         return $this->visitedPages;
     }
+    
+    /* Static functions */
     
     public static function writeToFile($filename, $pages) {
         $file_content = "";

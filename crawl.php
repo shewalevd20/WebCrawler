@@ -1,10 +1,12 @@
 <?php
 
-
-/**
- * RMIT
- * @author Daniel Stankevich
- * @author Karim Ainine
+/*
+ * RMIT University | School of Computer Science & IT
+ * COSC 1165 / 1167 — Intelligent Web Systems 
+ * Assignment 2 | Web Crawler and Mining
+ * 
+ * @author Karim Abulainine  s3314713
+ * @author Daniel Stankevich s3336691
  */
 
 include_once 'inc/readCLI.php';
@@ -14,6 +16,11 @@ include_once 'inc/generate_weka_file.php';
 require_once 'class/WebPage.class.php';
 require_once 'class/WebCrawler.class.php';
 
+define("FEEDBACK", false);
+define("GENERATE_ARRF", true);
+define("GENERATE_LINKS_CSV", true);
+
+// Read command lines
 $cli = array();
 try {
     $cli = readCLI();
@@ -35,11 +42,15 @@ $crawler = new WebCrawler($cli["politeness"], $cli["maxpages"], $cli["seed_url"]
 //Start crawling here
 echo "\nCrawler started...\n";
 $crawler->start();
-echo "Crawler finished.\n\n";
+echo "\n\nCrawler finished.\n\n";
 
+// Get all the pages the crawler visited
 $pages = $crawler->getVisitedPages();
-WebCrawler::writeToFile("links", $pages);
-generateWekaFile();
-exec("open " . BASE_URL . "index.php");
+
+// Launch some goodies
+if (GENERATE_LINKS_CSV) WebCrawler::writeToFile("links.csv", $pages);
+if (GENERATE_ARRF) generateWekaFile();
+if (FEEDBACK) exec("open " . BASE_URL . "index.php");
+
 
 ?>

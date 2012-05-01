@@ -1,11 +1,14 @@
 <?php
 
-/**
- * WebPage Class representation
- *
- * @author Daniel Stankevich
- * @author Karim Ainine
+/*
+ * RMIT University | School of Computer Science & IT
+ * COSC 1165 / 1167 — Intelligent Web Systems 
+ * Assignment 2 | Web Crawler and Mining
+ * 
+ * @author Karim Abulainine  s3314713
+ * @author Daniel Stankevich s3336691
  */
+
 class WebPage {
 
     private $url;
@@ -20,16 +23,16 @@ class WebPage {
         "ios" => array("text" => 0, "url" => 0, "weight" => 0.125),
         "phone" => array("text" => 0, "url" => 0, "weight" => 0.125));
 
-    function __construct($url, $host) {
+    // Main WebPage Class constructor
+    public function __construct($url, $host) {
         $this->url = $url;
         $this->host = $host;
         $this->visited = false;
     }
 
-    function fetchPage() {
+    public function fetchPage() {
 
     }
-
 
     public function getAllPageLinks() {        
         $anchors = $this->getAllAnchors(file_get_contents($this->url));
@@ -127,12 +130,9 @@ class WebPage {
             $weight += URL_OCCURRENCE_WEIGHT;
         }
 
-        //print_r("\nWeight: {$weight}\n");
-
         $this->mobile_article = ($weight > ARTICLE_THRESHOLD);
     }
 
-    // end of mobile checking
 }
 
 ?>
