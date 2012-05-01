@@ -1,4 +1,0 @@
-
-@RELATION ARTICLES
-@ATTRIBUTE mobile {0,1}
-@DATA
