@@ -52,5 +52,12 @@ if (GENERATE_LINKS_CSV) WebCrawler::writeToFile("data/links.csv", $pages);
 if (GENERATE_ARRF) generateWekaFile();
 if (FEEDBACK) exec("open " . BASE_URL . "index.php");
 
+/*
+ * exec("export CLASSPATH=$CLASSPATH:weka.jar");
+ * exec("javac WekaReader.java");
+ * exec("java WekaReader");
+ * 
+ */
+
 
 ?>
