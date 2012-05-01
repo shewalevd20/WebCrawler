@@ -9,7 +9,7 @@
  * @author Daniel Stankevich s3336691
  */
 
-$file_content = file_get_contents("links.csv");
+$file_content = file_get_contents("data/links.csv");
 $lines = explode("\n", $file_content);
 $pages = array();
 foreach($lines as $line){

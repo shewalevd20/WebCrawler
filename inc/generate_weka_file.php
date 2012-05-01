@@ -13,7 +13,7 @@ function generateWekaFile() {
     $classes = array(mobile => "Mobile", 
                      not_mobile => "Not_Mobile");
     
-    $filename = "articles.arrf";
+    $filename = "data/articles.arrf";
     fopen($filename, 'w');
     
     $weka_file = "";
@@ -21,9 +21,9 @@ function generateWekaFile() {
     $weka_file .= "\n@ATTRIBUTE mobile {0,1}";
     $weka_file .= "\n@DATA";
     
-    file_put_contents("articles.arrf", $weka_file);
+    file_put_contents($filename, $weka_file);
     
-    print_r("Weka file generated ('" . $filename . "')\n");
+    print_r("Weka file generated  ('" . $filename . "')\n");
 }
 
 ?>

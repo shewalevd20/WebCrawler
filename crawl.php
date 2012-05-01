@@ -16,7 +16,7 @@ include_once 'inc/generate_weka_file.php';
 require_once 'class/WebPage.class.php';
 require_once 'class/WebCrawler.class.php';
 
-define("FEEDBACK", false);
+define("FEEDBACK", true);
 define("GENERATE_ARRF", true);
 define("GENERATE_LINKS_CSV", true);
 
@@ -48,7 +48,7 @@ echo "\n\nCrawler finished.\n\n";
 $pages = $crawler->getVisitedPages();
 
 // Launch some goodies
-if (GENERATE_LINKS_CSV) WebCrawler::writeToFile("links.csv", $pages);
+if (GENERATE_LINKS_CSV) WebCrawler::writeToFile("data/links.csv", $pages);
 if (GENERATE_ARRF) generateWekaFile();
 if (FEEDBACK) exec("open " . BASE_URL . "index.php");
 

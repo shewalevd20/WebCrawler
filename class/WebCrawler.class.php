@@ -97,6 +97,7 @@ class WebCrawler {
             $counter++;
         }
         file_put_contents($filename, $file_content);
+        print_r("Links file generated ('" . $filename . "')\n");
     }
 }
 
