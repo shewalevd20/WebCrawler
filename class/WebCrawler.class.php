@@ -20,6 +20,10 @@ define("URL_OCCURRENCE_WEIGHT",0.5);
 define("ARTICLE_THRESHOLD",0.625);
 define("OCCURRENCE_THRESHOLD",10);
 define("BASE_URL",'http://localhost:8888/WebCrawler/');
+define("RELEVANT_SECTION", 'mobile');
+define("REL_PAGES_FOLDER", 'data/pages/relevant/');
+define("IRR_PAGES_FOLDER", 'data/pages/irrelevant/');
+define("PAGE_NAME_PREFIX", 'url_');
 
 class WebCrawler {
 
@@ -31,8 +35,9 @@ class WebCrawler {
     private $pages = array();
     private $visitedPages = array();
     private $visitedLinks = array();
-    
+    private $pageNames = array();
     private $start_time;
+    private $pages_counter;
 
     // Main WebCrawler Class constructor
     function __construct($politeness = DEFAULT_POLITENESS, $maxpages = MAX_PAGES, $seed_url = DEFAULT_SEED) {
@@ -40,11 +45,18 @@ class WebCrawler {
         $this->maxpages = $maxpages;
         $this->seed_url = $seed_url;
         $this->host = $this->getHost();
+        $this->pages_counter = 0;
     }
 
     public function start() {
+        // Comment the following line if you want to clean data/pages directory
+        self::makeDataCleanUp();
+        
         $this->start_time = time();
         $this->crawl_dfs($this->seed_url);
+        foreach ($this->visitedPages as $article) {
+            $article->extractPopularWords("hello hello hello wow the the");
+        }
         print_r("\nTotal fetched: " . count($this->visitedPages) . " pages.");
     }
     
@@ -57,8 +69,10 @@ class WebCrawler {
             $page->checkArticleTopic();
             $this->visitedPages[] = $page;
             $this->visitedLinks[] = $url;
-            
+            $this->pages_counter++;
+
             print_r("\nFetching: " . $url);
+            $page->fetchPage($this->pages_counter);
             
             foreach ($page->getAllPageLinks() as $link) {
                 if (!in_array($link, $this->visitedLinks)){
@@ -75,12 +89,15 @@ class WebCrawler {
         return $pieces[2];
     }
 
-    public function addPage($webPage) {
-        array_push($this->pages, $webPage);
-    }
-
     public function getVisitedPages() {
         return $this->visitedPages;
+    }
+
+    public static function makeDataCleanUp() {
+        $mask_relevant =  REL_PAGES_FOLDER . "url_*";
+        $mask_irrelevant = IRR_PAGES_FOLDER . "url_*";
+        array_map("unlink", glob($mask_relevant));
+        array_map("unlink", glob($mask_irrelevant));
     }
     
     /* Static functions */

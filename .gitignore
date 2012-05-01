@@ -10,3 +10,4 @@ nbproject
 # Project specific ignore files
 *.arrf
 links.csv
+data/

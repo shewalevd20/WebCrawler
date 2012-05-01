@@ -9,15 +9,32 @@
  * @author Daniel Stankevich s3336691
  */
 
-class WebPage {
+define("WORDS_AMNT", 10);
 
+class Word {
+    private $word;
+    private $occurrence;
+    public function __construct($word, $occurrence) {
+        $this->word = $word;
+        $this->occurrence = $occurrence;
+    }
+}
+
+class WebPage {
+    
+    private $id;
     private $url;
     private $content;
     private $host;
     private $visited;
     private $type;
     private $mobile_article;
+    private $relevant;
+    private $plainText;
+    
+    private $popular_words = array();
     private $linkedPages = array();
+    
     private static $keywords = array("mobile" => array("text" => 0, "url" => 0, "weight" => 0.125),
         "android" => array("text" => 0, "url" => 0, "weight" => 0.125),
         "ios" => array("text" => 0, "url" => 0, "weight" => 0.125),
@@ -28,14 +45,29 @@ class WebPage {
         $this->url = $url;
         $this->host = $host;
         $this->visited = false;
+        $this->relevant = false;        
+        $this->content = file_get_contents($this->url);
     }
 
-    public function fetchPage() {
-
+    public function fetchPage($id) {
+        $this->categorizePage();
+        $this->id = $id;
+        $output_filename = "";
+        
+        // Determine output folder
+        if ($this->relevant)
+            $output_filename = REL_PAGES_FOLDER . PAGE_NAME_PREFIX . $this->id;
+        else
+            $output_filename = IRR_PAGES_FOLDER . PAGE_NAME_PREFIX . $this->id;
+        
+        // Write to file
+        $file_content = "<!-- URL: " . $this->url . " -->\n" . $this->content;
+        file_put_contents($output_filename, $file_content);
+        print_r("\nPage saved to: " . $output_filename . "\n");
     }
 
     public function getAllPageLinks() {        
-        $anchors = $this->getAllAnchors(file_get_contents($this->url));
+        $anchors = $this->getAllAnchors($this->content);
         foreach ($anchors as $anchor) { 
             $href = $anchor;
             if (substr($href, 0, 4) == "http") {
@@ -81,6 +113,18 @@ class WebPage {
             return $href;
     }
 
+    private function categorizePage() {
+        $pizza = $this->url;
+        $pieces = explode("/", $pizza);
+        $section = $pieces[2];
+        foreach ($pieces as $piece) {
+            if ($piece == RELEVANT_SECTION) {
+                $this->relevant = true;
+                return;
+            }
+        }
+    }
+    
     // Accessors
     public function getUrl() {
         return $this->url;
@@ -109,11 +153,11 @@ class WebPage {
     // Code to check whether the page is a mobile page or not 
     // ** still needs a lot of modifications **
     public function checkArticleTopic() {
-        $plainText = strip_tags(file_get_contents($this->url)); //file_get_html($this->url)->plaintext;
+        $this->plainText = strip_tags(file_get_contents($this->url)); //file_get_html($this->url)->plaintext;
         $weight = 0;
         $inURL = FALSE;
         foreach (self::$keywords as $key => $value) {
-            $value["text"] = substr_count(strtolower($plainText), $key);
+            $value["text"] = substr_count(strtolower($this->plainText), $key);
             $value["url"] = substr_count(strtolower($this->url), $key);
 
             if ($value["text"] > OCCURRENCE_THRESHOLD) {
@@ -131,8 +175,35 @@ class WebPage {
         }
 
         $this->mobile_article = ($weight > ARTICLE_THRESHOLD);
+        //print_r("\n\n" . $this->plainText);
+    }
+    
+    public function extractPopularWords($text) {
+        $text = strtolower($text);
+        $all_words = explode(' ', $text);
+        //preg_match_all("/[a-z]*/", $all_words, $all_words);
+        
+        $words = array();
+        $added_words = array();
+        foreach ($all_words as $word_out) {
+            $count = 0;
+            if (!in_array($word_out, $added_words)) {
+                foreach ($all_words as $word_in)
+                    if ($word_out == $word_in) $count++;
+                $words[] = new Word ($word_out, $count);
+                $added_words[] = $word_out;
+            }
+        }
+        //print_r($words);
+    }
+    
+    public function calculateOccurances() {
+        
     }
 
+    
+    
 }
+
 
 ?>
