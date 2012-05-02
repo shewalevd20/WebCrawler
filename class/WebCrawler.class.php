@@ -9,6 +9,7 @@
  * @author Daniel Stankevich s3336691
  */
 
+
 require_once 'WebPage.class.php';
 require_once 'inc/simple_html_dom.php';
 
@@ -24,6 +25,7 @@ define("RELEVANT_SECTION", 'mobile');
 define("REL_PAGES_FOLDER", 'data/pages/relevant/');
 define("IRR_PAGES_FOLDER", 'data/pages/irrelevant/');
 define("PAGE_NAME_PREFIX", 'url_');
+define("WORDS_AMNT", 10);
 
 class WebCrawler {
 
@@ -49,7 +51,7 @@ class WebCrawler {
     }
 
     public function start() {
-
+        
         // Comment the following line if you want to clean data/pages directory
         self::makeDataCleanUp();
 
@@ -60,11 +62,14 @@ class WebCrawler {
             $this->addToAllKeywords($page_keywords);
         }
 
-        usort($this->all_keywords, array("WebPage", "sort"));
+        arsort($this->all_keywords);
         
-        for ($i = 0; ($i < 10 && $i< count($this->all_keywords)); $i++) {
-            print_r(($i + 1) . " - ");
-            print_r($this->all_keywords[$i]);
+        $count = 0;
+        foreach($this->all_keywords as $key=>$value){
+            if(($count++) == WORDS_AMNT){
+                break;
+            }
+            print_r("$key : $value");
             print_r("\n");
         }
         print_r("\nTotal fetched: " . count($this->visitedPages) . " pages.");
@@ -127,23 +132,14 @@ class WebCrawler {
     }
 
     public function addToAllKeywords($page_keywords) {
-        foreach ($page_keywords as $keyword) {
-            $key = -1;
-            foreach($this->all_keywords as $index=>$value){
-                if($keyword->getWord() == $value->getWord()){
-                    $key = $index;
-                    break;
-                }
-            }
-            
-            if ($key == -1) {
-                $this->all_keywords[] = $keyword;
+        foreach ($page_keywords as $key=>$keyword) {            
+            if (!array_key_exists($key, $this->all_keywords)){//$key == -1) {
+                $this->all_keywords[$key] = $keyword;
             } else {
-                if ($this->all_keywords[$key]->getOccurrence() < $keyword->getOccurrence()) {
-                    $this->all_keywords[$key]->setOccurrence($keyword->getOccurrence());
+                if ($this->all_keywords[$key] < $keyword) {
+                    $this->all_keywords[$key] = $keyword;
                 }
             }
-            
         }        
     }
 }

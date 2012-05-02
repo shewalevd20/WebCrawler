@@ -9,31 +9,8 @@
  * @author Daniel Stankevich s3336691
  */
 
-define("WORDS_AMNT", 20);
-
-class Word {
-    private $word;
-    private $occurrence;
-    public function __construct($word, $occurrence) {
-        $this->word = $word;
-        $this->occurrence = $occurrence;
-    }
-    
-    public function getOccurrence(){
-        return $this->occurrence;
-    }
-    
-    public function setOccurrence($occurrence){
-        $this->occurrence = $occurrence;
-    }
-    
-    public function getWord(){
-        return $this->word;
-    }
-}
-
 class WebPage {
-    
+
     private $id;
     private $url;
     private $content;
@@ -43,10 +20,8 @@ class WebPage {
     private $mobile_article;
     private $relevant;
     private $plainText;
-    
     private $popular_words = array();
     private $linkedPages = array();
-    
     private static $keywords = array("mobile" => array("text" => 0, "url" => 0, "weight" => 0.125),
         "android" => array("text" => 0, "url" => 0, "weight" => 0.125),
         "ios" => array("text" => 0, "url" => 0, "weight" => 0.125),
@@ -57,7 +32,7 @@ class WebPage {
         $this->url = $url;
         $this->host = $host;
         $this->visited = false;
-        $this->relevant = false;        
+        $this->relevant = false;
         $this->content = file_get_contents($this->url);
     }
 
@@ -65,22 +40,22 @@ class WebPage {
         $this->categorizePage();
         $this->id = $id;
         $output_filename = "";
-        
+
         // Determine output folder
         if ($this->relevant)
             $output_filename = REL_PAGES_FOLDER . PAGE_NAME_PREFIX . $this->id;
         else
             $output_filename = IRR_PAGES_FOLDER . PAGE_NAME_PREFIX . $this->id;
-        
+
         // Write to file
         $file_content = "<!-- URL: " . $this->url . " -->\n" . $this->content;
         file_put_contents($output_filename, $file_content);
         print_r("\nPage saved to: " . $output_filename . "\n");
     }
 
-    public function getAllPageLinks() {        
+    public function getAllPageLinks() {
         $anchors = $this->getAllAnchors($this->content);
-        foreach ($anchors as $anchor) { 
+        foreach ($anchors as $anchor) {
             $href = $anchor;
             if (substr($href, 0, 4) == "http") {
                 if ($this->sameHost($href)) {
@@ -92,23 +67,24 @@ class WebPage {
         $this->linkedPages = array_unique($this->linkedPages);
         return $this->linkedPages;
     }
-    
+
     private function getAllAnchors($html) {
         $anchors = array();
-        for ($i=0; $i < strlen($html); $i++) {
-            if ($html[$i] == '<' && $html[$i+1] == 'a') {
+        for ($i = 0; $i < strlen($html); $i++) {
+            if ($html[$i] == '<' && $html[$i + 1] == 'a') {
                 $href = "";
                 while (substr($html, $i++, 4) != "href");
-                while ($html[$i] != "\'" && $html[$i] != "\"") $i++;
+                while ($html[$i] != "\'" && $html[$i] != "\"")
+                    $i++;
                 $i++;
                 while ($html[$i] != "\'" && $html[$i] != "\"")
-                   $href .= $html[$i++];
+                    $href .= $html[$i++];
                 $anchors[] = $href;
-            }       
+            }
         }
         return $anchors;
     }
-    
+
     private function sameHost($url) {
         $pizza = $url;
         $pieces = explode("/", $pizza);
@@ -136,7 +112,7 @@ class WebPage {
             }
         }
     }
-    
+
     // Accessors
     public function getUrl() {
         return $this->url;
@@ -165,7 +141,16 @@ class WebPage {
     // Code to check whether the page is a mobile page or not 
     // ** still needs a lot of modifications **
     public function checkArticleTopic() {
-        $this->plainText = strip_tags(file_get_contents($this->url)); //file_get_html($this->url)->plaintext;
+       $this->plainText = strtolower(file_get_contents($this->url));
+//        $this->plainText = preg_replace("/(?<!\\n)\\r+(?!\\n)/", " ", $this->plainText); //replace just CR with CRLF 
+//        $this->plainText = preg_replace("/(?<!\\r)\\n+(?!\\r)/", " ", $this->plainText); //replace just LF with CRLF 
+//        $this->plainText = preg_replace("/(?<!\\r)\\n\\r+(?!\\n)/", " ", $this->plainText); //replace misordered LFCR with CRLF 
+//        print_r($this->plainText);
+//        exit;
+//        $this->plainText = preg_replace("/((<script).*(<\/script>)|(<script).*(>)|(<script).*(<\/>))/i", " ", $this->plainText);
+//        print_r($this->plainText);
+//        exit;
+        $this->plainText = strip_tags($this->plainText);
         $weight = 0;
         $inURL = FALSE;
         foreach (self::$keywords as $key => $value) {
@@ -189,40 +174,42 @@ class WebPage {
         $this->mobile_article = ($weight > ARTICLE_THRESHOLD);
         //print_r("\n\n" . $this->plainText);
     }
-    
+
     public function extractPopularWords() {
         $text = $this->plainText;
-        $text = strtolower($text);
-        
+
         $all_words = array();
         $text = preg_replace('/\s\s+\t\t+/', ' ', $text);
         preg_match_all("/[a-z]{3,}/", $text, $all_words);
-        if(count($all_words) > 0){
+        if (count($all_words) > 0) {
             $all_words = $all_words[0];
         }
-                        
+
         $words = array();
         $added_words = array();
         foreach ($all_words as $word_out) {
             $count = 0;
             if (!in_array($word_out, $added_words)) {
                 foreach ($all_words as $word_in)
-                    if ($word_out == $word_in) $count++;
-                $words[] = new Word ($word_out, $count);
+                    if ($word_out == $word_in)
+                        $count++;
+                $words[$word_out] = $count; //new Word($word_out, $count);
                 $added_words[] = $word_out;
             }
         }
+
+        arsort($words);
+        /*foreach($words as $key=>$value){
+            print_r("$key : $value");
+            print_r("\n");
+        }
+        exit;*/
         
-        usort($words, array("WebPage", "sort"));
-        //print_r($words);
-        /*for($i=0; $i<WORDS_AMNT; $i++){
-            $this->popular_words[] = $words[$i];
-        }*/     
         $this->popular_words = $words;
-        
+
         return $this->popular_words;
     }
-    
+
     //custom sorting function for associative arrays
     function sort($a, $b) {
         if ($a->getOccurrence() == $b->getOccurrence()) {
@@ -230,7 +217,7 @@ class WebPage {
         }
         return ($a->getOccurrence() > $b->getOccurrence()) ? -1 : 1;
     }
-}
 
+}
 
 ?>
