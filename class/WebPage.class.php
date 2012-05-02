@@ -215,9 +215,10 @@ class WebPage {
         
         usort($words, array("WebPage", "sort"));
         //print_r($words);
-        for($i=0; $i<WORDS_AMNT; $i++){
+        /*for($i=0; $i<WORDS_AMNT; $i++){
             $this->popular_words[] = $words[$i];
-        }     
+        }*/     
+        $this->popular_words = $words;
         
         return $this->popular_words;
     }
