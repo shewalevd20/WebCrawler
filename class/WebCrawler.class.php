@@ -38,6 +38,7 @@ class WebCrawler {
     private $pageNames = array();
     private $start_time;
     private $pages_counter;
+    private $all_keywords = array();
 
     // Main WebCrawler Class constructor
     function __construct($politeness = DEFAULT_POLITENESS, $maxpages = MAX_PAGES, $seed_url = DEFAULT_SEED) {
@@ -46,17 +47,37 @@ class WebCrawler {
         $this->seed_url = $seed_url;
         $this->host = $this->getHost();
         $this->pages_counter = 0;
+        
     }
 
     public function start() {
+        
         // Comment the following line if you want to clean data/pages directory
         self::makeDataCleanUp();
         
         $this->start_time = time();
         $this->crawl_dfs($this->seed_url);
         foreach ($this->visitedPages as $article) {
-            $article->extractPopularWords("hello hello hello wow the the");
+            $page_keywords = $article->extractPopularWords();
+            foreach ($page_keywords as $keyword){
+                $key = array_search($keyword->getWord(), $this->all_keywords);
+                if($key == FALSE){
+                    $this->all_keywords[] = $keyword;
+                }else{
+                    if($this->all_keywords[$key]->getOccurrence() < $keyword->getOccurrence()){
+                        $this->all_keywords[$key]->setOccurrence( $keyword->getOccurrence());
+                    }
+                    
+                }
+            }
         }
+        
+        usort($this->all_keywords, array("WebPage", "sort"));
+        for($i=0; $i<10; $i++){
+            print_r(($i+1)." - ");
+            print_r($this->all_keywords[$i]);
+            print_r("\n");
+        } 
         print_r("\nTotal fetched: " . count($this->visitedPages) . " pages.");
     }
     

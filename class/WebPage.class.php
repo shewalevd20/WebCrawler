@@ -9,7 +9,7 @@
  * @author Daniel Stankevich s3336691
  */
 
-define("WORDS_AMNT", 10);
+define("WORDS_AMNT", 20);
 
 class Word {
     private $word;
@@ -17,6 +17,18 @@ class Word {
     public function __construct($word, $occurrence) {
         $this->word = $word;
         $this->occurrence = $occurrence;
+    }
+    
+    public function getOccurrence(){
+        return $this->occurrence;
+    }
+    
+    public function setOccurrence($occurrence){
+        $this->occurrence = $occurrence;
+    }
+    
+    public function getWord(){
+        return $this->word;
     }
 }
 
@@ -178,11 +190,17 @@ class WebPage {
         //print_r("\n\n" . $this->plainText);
     }
     
-    public function extractPopularWords($text) {
+    public function extractPopularWords() {
+        $text = $this->plainText;
         $text = strtolower($text);
-        $all_words = explode(' ', $text);
-        //preg_match_all("/[a-z]*/", $all_words, $all_words);
         
+        $all_words = array();
+        $text = preg_replace('/\s\s+\t\t+/', ' ', $text);
+        preg_match_all("/[a-z]{3,}/", $text, $all_words);
+        if(count($all_words) > 0){
+            $all_words = $all_words[0];
+        }
+                        
         $words = array();
         $added_words = array();
         foreach ($all_words as $word_out) {
@@ -194,15 +212,23 @@ class WebPage {
                 $added_words[] = $word_out;
             }
         }
-        //print_r($words);
-    }
-    
-    public function calculateOccurances() {
         
+        usort($words, array("WebPage", "sort"));
+        //print_r($words);
+        for($i=0; $i<WORDS_AMNT; $i++){
+            $this->popular_words[] = $words[$i];
+        }     
+        
+        return $this->popular_words;
     }
-
     
-    
+    //custom sorting function for associative arrays
+    function sort($a, $b) {
+        if ($a->getOccurrence() == $b->getOccurrence()) {
+            return 0;
+        }
+        return ($a->getOccurrence() > $b->getOccurrence()) ? -1 : 1;
+    }
 }
 
 
