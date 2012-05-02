@@ -12,28 +12,31 @@
 define("WORDS_AMNT", 20);
 
 class Word {
+
     private $word;
     private $occurrence;
+
     public function __construct($word, $occurrence) {
         $this->word = $word;
         $this->occurrence = $occurrence;
     }
-    
-    public function getOccurrence(){
+
+    public function getOccurrence() {
         return $this->occurrence;
     }
-    
-    public function setOccurrence($occurrence){
+
+    public function setOccurrence($occurrence) {
         $this->occurrence = $occurrence;
     }
-    
-    public function getWord(){
+
+    public function getWord() {
         return $this->word;
     }
+
 }
 
 class WebPage {
-    
+
     private $id;
     private $url;
     private $content;
@@ -43,10 +46,8 @@ class WebPage {
     private $mobile_article;
     private $relevant;
     private $plainText;
-    
     private $popular_words = array();
     private $linkedPages = array();
-    
     private static $keywords = array("mobile" => array("text" => 0, "url" => 0, "weight" => 0.125),
         "android" => array("text" => 0, "url" => 0, "weight" => 0.125),
         "ios" => array("text" => 0, "url" => 0, "weight" => 0.125),
@@ -57,7 +58,7 @@ class WebPage {
         $this->url = $url;
         $this->host = $host;
         $this->visited = false;
-        $this->relevant = false;        
+        $this->relevant = false;
         $this->content = file_get_contents($this->url);
     }
 
@@ -65,22 +66,22 @@ class WebPage {
         $this->categorizePage();
         $this->id = $id;
         $output_filename = "";
-        
+
         // Determine output folder
         if ($this->relevant)
             $output_filename = REL_PAGES_FOLDER . PAGE_NAME_PREFIX . $this->id;
         else
             $output_filename = IRR_PAGES_FOLDER . PAGE_NAME_PREFIX . $this->id;
-        
+
         // Write to file
         $file_content = "<!-- URL: " . $this->url . " -->\n" . $this->content;
         file_put_contents($output_filename, $file_content);
         print_r("\nPage saved to: " . $output_filename . "\n");
     }
 
-    public function getAllPageLinks() {        
+    public function getAllPageLinks() {
         $anchors = $this->getAllAnchors($this->content);
-        foreach ($anchors as $anchor) { 
+        foreach ($anchors as $anchor) {
             $href = $anchor;
             if (substr($href, 0, 4) == "http") {
                 if ($this->sameHost($href)) {
@@ -92,23 +93,24 @@ class WebPage {
         $this->linkedPages = array_unique($this->linkedPages);
         return $this->linkedPages;
     }
-    
+
     private function getAllAnchors($html) {
         $anchors = array();
-        for ($i=0; $i < strlen($html); $i++) {
-            if ($html[$i] == '<' && $html[$i+1] == 'a') {
+        for ($i = 0; $i < strlen($html); $i++) {
+            if ($html[$i] == '<' && $html[$i + 1] == 'a') {
                 $href = "";
                 while (substr($html, $i++, 4) != "href");
-                while ($html[$i] != "\'" && $html[$i] != "\"") $i++;
+                while ($html[$i] != "\'" && $html[$i] != "\"")
+                    $i++;
                 $i++;
                 while ($html[$i] != "\'" && $html[$i] != "\"")
-                   $href .= $html[$i++];
+                    $href .= $html[$i++];
                 $anchors[] = $href;
-            }       
+            }
         }
         return $anchors;
     }
-    
+
     private function sameHost($url) {
         $pizza = $url;
         $pieces = explode("/", $pizza);
@@ -136,7 +138,7 @@ class WebPage {
             }
         }
     }
-    
+
     // Accessors
     public function getUrl() {
         return $this->url;
@@ -165,7 +167,8 @@ class WebPage {
     // Code to check whether the page is a mobile page or not 
     // ** still needs a lot of modifications **
     public function checkArticleTopic() {
-        $this->plainText = strip_tags(file_get_contents($this->url)); //file_get_html($this->url)->plaintext;
+        $this->plainText = strtolower(strip_tags(file_get_contents($this->url))); //file_get_html($this->url)->plaintext;
+
         $weight = 0;
         $inURL = FALSE;
         foreach (self::$keywords as $key => $value) {
@@ -189,39 +192,41 @@ class WebPage {
         $this->mobile_article = ($weight > ARTICLE_THRESHOLD);
         //print_r("\n\n" . $this->plainText);
     }
-    
+
     public function extractPopularWords() {
+        $this->deleteTagWithContent("script");
         $text = $this->plainText;
-        $text = strtolower($text);
-        
+
+
         $all_words = array();
         $text = preg_replace('/\s\s+\t\t+/', ' ', $text);
         preg_match_all("/[a-z]{3,}/", $text, $all_words);
-        if(count($all_words) > 0){
+        if (count($all_words) > 0) {
             $all_words = $all_words[0];
         }
-                        
+
         $words = array();
         $added_words = array();
         foreach ($all_words as $word_out) {
             $count = 0;
             if (!in_array($word_out, $added_words)) {
                 foreach ($all_words as $word_in)
-                    if ($word_out == $word_in) $count++;
-                $words[] = new Word ($word_out, $count);
+                    if ($word_out == $word_in)
+                        $count++;
+                $words[] = new Word($word_out, $count);
                 $added_words[] = $word_out;
             }
         }
-        
+
         usort($words, array("WebPage", "sort"));
         //print_r($words);
-        for($i=0; $i<WORDS_AMNT; $i++){
+        for ($i = 0; $i < WORDS_AMNT; $i++) {
             $this->popular_words[] = $words[$i];
-        }     
-        
+        }
+
         return $this->popular_words;
     }
-    
+
     //custom sorting function for associative arrays
     function sort($a, $b) {
         if ($a->getOccurrence() == $b->getOccurrence()) {
@@ -229,7 +234,52 @@ class WebPage {
         }
         return ($a->getOccurrence() > $b->getOccurrence()) ? -1 : 1;
     }
-}
 
+    private function deleteScriptTags() {
+        $text = "<script 123> ajhksja </script> kld sflj sdljkfjl kasd <script> DELETED </script>";
+        $numOfScripts = substr_count($text, "<script");
+        $offset = 12;
+        print_r("Number of tags: " . $numOfScripts . "\n");
+        for ($i = 0; $i < $numOfScripts; $i++) {
+            $from = strpos($text, "<script");
+            while ($text[$from] != '>')
+                $from++;
+            $to = strpos($text, "</script>");
+            print_r("From - to: " . $from . " - " . $to . "\n");
+            $text = substr_replace($text, " ", $from, $to - $from);
+        }
+        print_r($text);
+        exit();
+        //$this->plainText = $text; 
+    }
+
+    private function deleteTagWithContent($tagname) {
+        $text = $this->content;
+
+        $prefix = "<";
+        $suffix = ">";
+
+        $replacement = "";
+
+        $open_tag = $prefix . $tagname;
+        $close_tag = $prefix . '/' . $tagname . $suffix;
+        $offset = strlen($close_tag);
+        $open_tag_count = substr_count($text, $open_tag);
+        $container = true; // Using this we can remove not-container tags easily NYI
+
+        for ($i = 0; $i < $open_tag_count; $i++) {
+            $from = strpos($text, $open_tag);
+            $j = $from;
+            while ($text[++$j] != $suffix);
+            $to = ($text[$j - 1] == '/') ? $j + 1 : strpos($text, $close_tag) + $offset;
+            $length = $to - $from;
+            $text = substr_replace($text, $replacement, $from, $length);
+        }
+        //file_put_contents("123.html", $text); exit();
+        $this->plainText = $text;
+
+    }
+
+}
 
 ?>

@@ -67,7 +67,6 @@ class WebCrawler {
                     if($this->all_keywords[$key]->getOccurrence() < $keyword->getOccurrence()){
                         $this->all_keywords[$key]->setOccurrence( $keyword->getOccurrence());
                     }
-                    
                 }
             }
         }
