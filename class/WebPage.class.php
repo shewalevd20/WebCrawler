@@ -11,30 +11,6 @@
 
 define("WORDS_AMNT", 20);
 
-class Word {
-
-    private $word;
-    private $occurrence;
-
-    public function __construct($word, $occurrence) {
-        $this->word = $word;
-        $this->occurrence = $occurrence;
-    }
-
-    public function getOccurrence() {
-        return $this->occurrence;
-    }
-
-    public function setOccurrence($occurrence) {
-        $this->occurrence = $occurrence;
-    }
-
-    public function getWord() {
-        return $this->word;
-    }
-
-}
-
 class WebPage {
 
     private $id;
@@ -167,7 +143,16 @@ class WebPage {
     // Code to check whether the page is a mobile page or not 
     // ** still needs a lot of modifications **
     public function checkArticleTopic() {
-        $this->plainText = strtolower(strip_tags(file_get_contents($this->url))); //file_get_html($this->url)->plaintext;
+        $this->plainText = strtolower(file_get_contents($this->url));
+//        $this->plainText = preg_replace("/(?<!\\n)\\r+(?!\\n)/", " ", $this->plainText); //replace just CR with CRLF 
+//        $this->plainText = preg_replace("/(?<!\\r)\\n+(?!\\r)/", " ", $this->plainText); //replace just LF with CRLF 
+//        $this->plainText = preg_replace("/(?<!\\r)\\n\\r+(?!\\n)/", " ", $this->plainText); //replace misordered LFCR with CRLF 
+//        print_r($this->plainText);
+//        exit;
+//        $this->plainText = preg_replace("/((<script).*(<\/script>)|(<script).*(>)|(<script).*(<\/>))/i", " ", $this->plainText);
+//        print_r($this->plainText);
+//        exit;
+        //$this->plainText = strip_tags($this->plainText);
 
         $weight = 0;
         $inURL = FALSE;
@@ -195,12 +180,16 @@ class WebPage {
 
     public function extractPopularWords() {
         $this->deleteTagWithContent("script");
+        $this->deleteTagWithContent("noscript");
+        $this->deleteTagWithContent("head");
         $text = $this->plainText;
-
+        $text = strip_tags($text);
+        $text = preg_replace('/\s\s+\t\t+/', ' ', $text);
+        file_put_contents("data/plain_html.html", $text);
 
         $all_words = array();
-        $text = preg_replace('/\s\s+\t\t+/', ' ', $text);
-        preg_match_all("/[a-z]{3,}/", $text, $all_words);
+        
+        preg_match_all("/[a-z]{4,}/", $text, $all_words);
         if (count($all_words) > 0) {
             $all_words = $all_words[0];
         }
@@ -213,17 +202,20 @@ class WebPage {
                 foreach ($all_words as $word_in)
                     if ($word_out == $word_in)
                         $count++;
-                $words[] = new Word($word_out, $count);
+                $words[$word_out] = $count; //new Word($word_out, $count);
+
                 $added_words[] = $word_out;
             }
         }
 
-        usort($words, array("WebPage", "sort"));
-        //print_r($words);
-        for ($i = 0; $i < WORDS_AMNT; $i++) {
-            $this->popular_words[] = $words[$i];
+        arsort($words);
+        /*foreach($words as $key=>$value){
+            print_r("$key : $value");
+            print_r("\n");
         }
-
+        exit;*/
+        
+        $this->popular_words = $words;
         return $this->popular_words;
     }
 
@@ -235,26 +227,8 @@ class WebPage {
         return ($a->getOccurrence() > $b->getOccurrence()) ? -1 : 1;
     }
 
-    private function deleteScriptTags() {
-        $text = "<script 123> ajhksja </script> kld sflj sdljkfjl kasd <script> DELETED </script>";
-        $numOfScripts = substr_count($text, "<script");
-        $offset = 12;
-        print_r("Number of tags: " . $numOfScripts . "\n");
-        for ($i = 0; $i < $numOfScripts; $i++) {
-            $from = strpos($text, "<script");
-            while ($text[$from] != '>')
-                $from++;
-            $to = strpos($text, "</script>");
-            print_r("From - to: " . $from . " - " . $to . "\n");
-            $text = substr_replace($text, " ", $from, $to - $from);
-        }
-        print_r($text);
-        exit();
-        //$this->plainText = $text; 
-    }
-
     private function deleteTagWithContent($tagname) {
-        $text = $this->content;
+        $text = $this->plainText;
 
         $prefix = "<";
         $suffix = ">";
@@ -277,7 +251,6 @@ class WebPage {
         }
         //file_put_contents("123.html", $text); exit();
         $this->plainText = $text;
-
     }
 
 }
