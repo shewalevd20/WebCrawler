@@ -57,12 +57,20 @@ if (GENERATE_LINKS_CSV){
     WebCrawler::writeToFile("data/links.csv", $pages);
 }
 if (GENERATE_ARFF) $crawler->generateWekaFile();
-if (FEEDBACK) exec("open " . BASE_URL . "index.php");
 if (WEKA_READER) {
     exec("javac -cp $"."CLASSPATH:WekaReaderApp/weka.jar WekaReaderApp/WekaReader.java");
     exec("java -cp $"."CLASSPATH:WekaReaderApp/weka.jar WekaReaderApp/WekaReader");
     echo "\nWeka file generated and classified.\n";
 }
+
+// read links and classify them from labeled.arff
+
+// display links in index.php
+if (FEEDBACK) exec("open " . BASE_URL . "index.php");
+
+// add user feedback to articles.arff
+
+// run training again
 
 echo "\nPROGRAM FINISHED.\n";
 ?>

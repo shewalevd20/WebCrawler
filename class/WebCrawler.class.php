@@ -186,6 +186,8 @@ class WebCrawler {
     public function getAllKeywords() {
         return $this->all_keywords;
     }
+    
+    
 
 }
 
