@@ -114,6 +114,10 @@ class WebPage {
             }
         }
     }
+    
+    public function getPopularWords($key){
+        return $this->popular_words[$key];
+    }
 
     // Accessors
     public function getUrl() {
@@ -139,21 +143,15 @@ class WebPage {
     public function setVisited() {
         $this->visited = true;
     }
+    
+    public function isRelevant(){
+        return $this->relevant;
+    }
 
     // Code to check whether the page is a mobile page or not 
     // ** still needs a lot of modifications **
     public function checkArticleTopic() {
         $this->plainText = strtolower(file_get_contents($this->url));
-//        $this->plainText = preg_replace("/(?<!\\n)\\r+(?!\\n)/", " ", $this->plainText); //replace just CR with CRLF 
-//        $this->plainText = preg_replace("/(?<!\\r)\\n+(?!\\r)/", " ", $this->plainText); //replace just LF with CRLF 
-//        $this->plainText = preg_replace("/(?<!\\r)\\n\\r+(?!\\n)/", " ", $this->plainText); //replace misordered LFCR with CRLF 
-//        print_r($this->plainText);
-//        exit;
-//        $this->plainText = preg_replace("/((<script).*(<\/script>)|(<script).*(>)|(<script).*(<\/>))/i", " ", $this->plainText);
-//        print_r($this->plainText);
-//        exit;
-        //$this->plainText = strip_tags($this->plainText);
-
         $weight = 0;
         $inURL = FALSE;
         foreach (self::$keywords as $key => $value) {

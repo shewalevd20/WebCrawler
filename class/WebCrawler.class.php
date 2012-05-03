@@ -51,7 +51,7 @@ class WebCrawler {
     }
 
     public function start() {
-        
+
         // Comment the following line if you want to clean data/pages directory
         self::makeDataCleanUp();
 
@@ -59,29 +59,14 @@ class WebCrawler {
         $this->crawl_dfs($this->seed_url);
         foreach ($this->visitedPages as $article) {
             $page_keywords = $article->extractPopularWords();
-//<<<<<<< HEAD
-//            foreach ($page_keywords as $keyword){
-//                $key = array_search($keyword->getWord(), $this->all_keywords);
-//                if($key == FALSE){
-//                    $this->all_keywords[] = $keyword;
-//                }else{
-//                    if($this->all_keywords[$key]->getOccurrence() < $keyword->getOccurrence()){
-//                        $this->all_keywords[$key]->setOccurrence( $keyword->getOccurrence());
-//                    }
-//                }
-//            }
-//=======
             $this->addToAllKeywords($page_keywords);
-
         }
 
         arsort($this->all_keywords);
-        
-        $count = 0;
-        foreach($this->all_keywords as $key=>$value){
-            if(($count++) == WORDS_AMNT){
-                break;
-            }
+
+        $this->all_keywords = array_slice($this->all_keywords, 0, WORDS_AMNT);
+
+        foreach ($this->all_keywords as $key => $value) {
             print_r("$key : $value");
             print_r("\n");
         }
@@ -90,7 +75,6 @@ class WebCrawler {
 
     // DFS based crawler function
     private function crawl_dfs($url) {
-        $currentTime = time();
         if ((count($this->visitedPages) < $this->maxpages) && ((time() - $this->start_time) <= $this->politeness)) {
             $page = new WebPage($url, $this->host);
             $page->checkArticleTopic();
@@ -145,16 +129,44 @@ class WebCrawler {
     }
 
     public function addToAllKeywords($page_keywords) {
-        foreach ($page_keywords as $key=>$keyword) {            
-            if (!array_key_exists($key, $this->all_keywords)){//$key == -1) {
+        foreach ($page_keywords as $key => $keyword) {
+            if (!array_key_exists($key, $this->all_keywords)) {//$key == -1) {
                 $this->all_keywords[$key] = $keyword;
             } else {
                 if ($this->all_keywords[$key] < $keyword) {
                     $this->all_keywords[$key] = $keyword;
                 }
             }
-        }        
+        }
     }
+
+    public function generateWekaFile() {
+        $lineStr = "@RELATION Articles \n";
+        foreach ($this->all_keywords as $key => $value) {
+            $lineStr .= "@ATTRIBUTE {$key} NUMERIC \n";
+        }
+        $lineStr .= "@ATTRIBUTE class {Mobile,Not-Mobile}\n";
+        $lineStr .= "@DATA";
+
+        foreach ($this->visitedPages as $page) {
+            $lineStr .= "\n";
+            $counter = 0;
+            foreach ($this->all_keywords as $key => $value) {
+                $occurrence = $page->getPopularWords($key);
+
+                if (isset($occurrence) && trim($occurrence) != '') {
+                    $str = $occurrence;
+                } else {
+                    $str = 0;
+                }
+                $lineStr .= $str . ",";
+            }
+            $lineStr .= ($page->isRelevant() ? "Mobile" : "Not-Mobile");
+        }
+
+        file_put_contents("data/articles.arff", $lineStr);
+    }
+
 }
 
 ?>

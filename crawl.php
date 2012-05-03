@@ -17,7 +17,7 @@ require_once 'class/WebPage.class.php';
 require_once 'class/WebCrawler.class.php';
 
 define("FEEDBACK", false);
-define("GENERATE_ARRF", true);
+define("GENERATE_ARFF", true);
 define("GENERATE_LINKS_CSV", true);
 define("WEKA_READER", false);
 
@@ -50,7 +50,7 @@ $pages = $crawler->getVisitedPages();
 
 // Launch some goodies
 if (GENERATE_LINKS_CSV) WebCrawler::writeToFile("data/links.csv", $pages);
-if (GENERATE_ARRF) generateWekaFile();
+if (GENERATE_ARFF) $crawler->generateWekaFile();
 if (FEEDBACK) exec("open " . BASE_URL . "index.php");
 if (WEKA_READER) {
     exec("export CLASSPATH=$CLASSPATH:weka.jar");
