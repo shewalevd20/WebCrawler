@@ -17,9 +17,9 @@ require_once 'class/WebPage.class.php';
 require_once 'class/WebCrawler.class.php';
 
 define("FEEDBACK", false);
-define("GENERATE_ARFF", true);
+define("GENERATE_ARFF", false);
 define("GENERATE_LINKS_CSV", true);
-define("WEKA_READER", false);
+define("WEKA_READER", true);
 
 echo "\nPROGRAM STARTED.\n\n";
 
@@ -39,23 +39,30 @@ try {
     die();
 }
 
+// TRAINING
+$trainer = new WebCrawler();
+echo "\nTraining...\n";
+$trainer->start();
+echo "\n\nSystem Trained.\n\n";
+
 // CRAWLING
-$crawler = new WebCrawler($cli["politeness"], $cli["maxpages"], $cli["seed_url"]);
+$crawler = new WebCrawler($cli["politeness"], $cli["maxpages"], $cli["seed_url"], FALSE, $trainer->getAllKeywords());
 echo "\nCrawler started...\n";
 $crawler->start();
 echo "\n\nCrawler finished.\n\n";
 
-// Get all the pages the crawler visited
-$pages = $crawler->getVisitedPages();
-
 // Launch some goodies
-if (GENERATE_LINKS_CSV) WebCrawler::writeToFile("data/links.csv", $pages);
+if (GENERATE_LINKS_CSV){
+    $pages = $crawler->getVisitedPages();
+    WebCrawler::writeToFile("data/links.csv", $pages);
+}
 if (GENERATE_ARFF) $crawler->generateWekaFile();
 if (FEEDBACK) exec("open " . BASE_URL . "index.php");
 if (WEKA_READER) {
-    exec("export CLASSPATH=$CLASSPATH:weka.jar");
-    exec("javac WekaReader.java");
-    exec("java WekaReader");
+    exec("export CLASSPATH=\$CLASSPATH:WekaReaderApp/weka.jar");
+    exec("javac WekaReaderApp/WekaReader.java");
+    exec("java WekaReaderApp/WekaReader");
+    echo "\nWeka file generated and classified.\n";
 }
 
 echo "\nPROGRAM FINISHED.\n";

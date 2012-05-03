@@ -15,13 +15,13 @@ require_once 'inc/simple_html_dom.php';
 
 // Crawler constants
 define("MAX_PAGES", 20);
-define("DEFAULT_SEED", "http://www.theage.com.au/digital-life/");
+define("DEFAULT_SEED", "http://www.theage.com.au/digital-life/mobiles/Mobiles");
 define("DEFAULT_POLITENESS", 30);
 define("URL_OCCURRENCE_WEIGHT", 0.5);
 define("ARTICLE_THRESHOLD", 0.625);
 define("OCCURRENCE_THRESHOLD", 10);
 define("BASE_URL", 'http://localhost:8888/WebCrawler/');
-define("RELEVANT_SECTION", 'mobile');
+define("RELEVANT_SECTION", 'mobiles');
 define("REL_PAGES_FOLDER", 'data/pages/relevant/');
 define("IRR_PAGES_FOLDER", 'data/pages/irrelevant/');
 define("PAGE_NAME_PREFIX", 'url_');
@@ -40,17 +40,22 @@ class WebCrawler {
     private $start_time;
     private $pages_counter;
     private $all_keywords = array();
+    private $train;
 
     // Main WebCrawler Class constructor
-    function __construct($politeness = DEFAULT_POLITENESS, $maxpages = MAX_PAGES, $seed_url = DEFAULT_SEED) {
+    function __construct($politeness = DEFAULT_POLITENESS, $maxpages = MAX_PAGES, $seed_url = DEFAULT_SEED, $train = TRUE, $all_keywords = array()) {
         $this->politeness = $politeness;
         $this->maxpages = $maxpages;
         $this->seed_url = $seed_url;
         $this->host = $this->getHost();
         $this->pages_counter = 0;
+        $this->train = $train;
+        if (!$this->train)
+            $this->all_keywords = $all_keywords;
     }
 
     public function start() {
+
 
         // Comment the following line if you want to clean data/pages directory
         self::makeDataCleanUp();
@@ -59,17 +64,16 @@ class WebCrawler {
         $this->crawl_dfs($this->seed_url);
         foreach ($this->visitedPages as $article) {
             $page_keywords = $article->extractPopularWords();
-            $this->addToAllKeywords($page_keywords);
+            if ($this->train)
+                $this->addToAllKeywords($page_keywords);
         }
 
-        arsort($this->all_keywords);
-
-        $this->all_keywords = array_slice($this->all_keywords, 0, WORDS_AMNT);
-
-        foreach ($this->all_keywords as $key => $value) {
-            print_r("$key : $value");
-            print_r("\n");
+        if ($this->train) {
+            arsort($this->all_keywords);
+            $this->all_keywords = array_slice($this->all_keywords, 0, WORDS_AMNT);
         }
+        $this->generateWekaFile();
+
         print_r("\nTotal fetched: " . count($this->visitedPages) . " pages.");
     }
 
@@ -83,7 +87,8 @@ class WebCrawler {
             $this->pages_counter++;
 
             print_r("\nFetching: " . $url);
-            $page->fetchPage($this->pages_counter);
+            if ($this->train)
+                $page->fetchPage($this->pages_counter);
 
             foreach ($page->getAllPageLinks() as $link) {
                 if (!in_array($link, $this->visitedLinks)) {
@@ -129,14 +134,18 @@ class WebCrawler {
     }
 
     public function addToAllKeywords($page_keywords) {
-        foreach ($page_keywords as $key => $keyword) {
-            if (!array_key_exists($key, $this->all_keywords)) {//$key == -1) {
-                $this->all_keywords[$key] = $keyword;
+        $numPages = count($this->visitedPages);
+        foreach ($page_keywords as $keyword => $occurrence) {
+            if (!array_key_exists($keyword, $this->all_keywords)) {//$key == -1) {
+                $this->all_keywords[$keyword] = $occurrence;
             } else {
-                if ($this->all_keywords[$key] < $keyword) {
-                    $this->all_keywords[$key] = $keyword;
-                }
+                $this->all_keywords[$keyword] += $occurrence;
             }
+        }
+
+        $numPages = count($this->visitedPages);
+        foreach ($this->all_keywords as $key => $value) {
+            $this->all_keywords[$key] = $value / $numPages;
         }
     }
 
@@ -150,7 +159,6 @@ class WebCrawler {
 
         foreach ($this->visitedPages as $page) {
             $lineStr .= "\n";
-            $counter = 0;
             foreach ($this->all_keywords as $key => $value) {
                 $occurrence = $page->getPopularWords($key);
 
@@ -161,10 +169,22 @@ class WebCrawler {
                 }
                 $lineStr .= $str . ",";
             }
-            $lineStr .= ($page->isRelevant() ? "Mobile" : "Not-Mobile");
+            if ($this->train) {
+                $lineStr .= ($page->isRelevant() ? "Mobile" : "Not-Mobile");
+            } else {
+                $lineStr .= "?";
+            }
         }
 
-        file_put_contents("data/articles.arff", $lineStr);
+        if ($this->train) {
+            file_put_contents("data/articles.arff", $lineStr);
+        } else {
+            file_put_contents("data/unlabeled.arff", $lineStr);
+        }
+    }
+
+    public function getAllKeywords() {
+        return $this->all_keywords;
     }
 
 }

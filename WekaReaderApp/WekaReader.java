@@ -2,13 +2,17 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
+package WekaReaderApp;
+
 import java.io.*;
 import weka.core.Instances;
 import java.util.Random;
 import weka.attributeSelection.*;
 import weka.classifiers.Evaluation;
+import weka.classifiers.bayes.NaiveBayesUpdateable;
 import weka.classifiers.meta.AttributeSelectedClassifier;
 import weka.classifiers.trees.J48;
+import weka.core.Instance;
 import weka.filters.Filter;
 
 /**
@@ -23,28 +27,65 @@ public class WekaReader {
      */
     public static void main(String[] args) {
         try {
+            
+            BufferedReader reader = new BufferedReader(
+                    new FileReader("data/articles.arff"));
+            Instances data = new Instances(reader);
+            reader.close();
+            // setting class attribute
+            data.setClassIndex(data.numAttributes() - 1);
 
-            CfsSubsetEval eval = new CfsSubsetEval();
-            String[] options = new String[8];
-            options[0] = "-i";
-            options[1] = "../data/iris.arff";
-            options[2] = "-s";
-            options[3] = "weka.attributeSelection.BestFirst -D 1 -N 5";
-            options[4] = "-x";
-            options[5] = "10";
-            options[6] = "-n";
-            options[7] = "1";
+            String[] treeOptions = new String[1];
+            treeOptions[0] = "-U";            // unpruned tree
+            J48 tree = new J48();         // new instance of tree
+            tree.setOptions(treeOptions);     // set the options
+            tree.buildClassifier(data);
 
-            //System.out.println(AttributeSelection.SelectAttributes(eval, options));
+            // train NaiveBayes
+            NaiveBayesUpdateable nb = new NaiveBayesUpdateable();
+            nb.buildClassifier(data);
+            for (int i = 0; i < data.numInstances(); i++) {
+                nb.updateClassifier(data.instance(i));
+            }
 
-            FileWriter fstream = new FileWriter("../data/output.txt");
-            BufferedWriter out = new BufferedWriter(fstream);
-            out.write(AttributeSelection.SelectAttributes(eval, options));
-            //Close the output stream
-            out.close();
+            Evaluation eval = new Evaluation(data);
+            eval.crossValidateModel(tree, data, 10, new Random(1));
+
+            Instances unlabeled = new Instances(
+                    new BufferedReader(
+                    new FileReader("data/unlabeled.arff")));
+
+            // set class attribute
+            unlabeled.setClassIndex(unlabeled.numAttributes() - 1);
+
+            // create copy
+            Instances labeled = new Instances(unlabeled);
+
+            // label instances
+            for (int i = 0; i < unlabeled.numInstances(); i++) {
+                double clsLabel = tree.classifyInstance(unlabeled.instance(i));
+                labeled.instance(i).setClassValue(clsLabel);
+                //System.out.println(clsLabel + " -> " + unlabeled.classAttribute().value((int) clsLabel) + " : " + print(tree.distributionForInstance(unlabeled.instance(i))));
+            }
+            // save labeled data
+            BufferedWriter writer = new BufferedWriter(
+                    new FileWriter("data/labeled.arff"));            
+            
+            writer.write(labeled.toString());
+            writer.newLine();
+            writer.flush();
+            writer.close();
 
         } catch (Exception e) {
             System.out.print(e.toString());
         }
+    }
+    
+    public static String print(double [] array){
+        String result = "";
+        for(Double d : array){
+            result += "["+ d + "]";
+        }
+        return result;
     }
 }
