@@ -59,9 +59,8 @@ if (GENERATE_LINKS_CSV){
 if (GENERATE_ARFF) $crawler->generateWekaFile();
 if (FEEDBACK) exec("open " . BASE_URL . "index.php");
 if (WEKA_READER) {
-    exec("export CLASSPATH=\$CLASSPATH:WekaReaderApp/weka.jar");
-    exec("javac WekaReaderApp/WekaReader.java");
-    exec("java WekaReaderApp/WekaReader");
+    exec("javac -cp $"."CLASSPATH:WekaReaderApp/weka.jar WekaReaderApp/WekaReader.java");
+    exec("java -cp $"."CLASSPATH:WekaReaderApp/weka.jar WekaReaderApp/WekaReader");
     echo "\nWeka file generated and classified.\n";
 }
 
