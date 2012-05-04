@@ -14,7 +14,7 @@ require_once 'WebPage.class.php';
 require_once 'inc/simple_html_dom.php';
 
 // Crawler constants
-define("MAX_PAGES", 100);
+define("MAX_PAGES", 2);
 define("DEFAULT_SEED", "http://www.theage.com.au/digital-life/mobiles/Mobiles");
 define("DEFAULT_POLITENESS", 30);
 define("URL_OCCURRENCE_WEIGHT", 0.5);
@@ -79,7 +79,11 @@ class WebCrawler {
 
     // DFS based crawler function
     private function crawl_dfs($url) {
-        if ((count($this->visitedPages) < $this->maxpages) && ((time() - $this->start_time) <= $this->politeness)) {
+        if ((count($this->visitedPages) < $this->maxpages)) {
+            if (count($this->visitedPages) > 0) {
+                sleep($this->politeness);
+            }
+            
             $page = new WebPage($url, $this->host);
             $this->visitedPages[] = $page;
             $this->visitedLinks[] = $url;

@@ -40,7 +40,7 @@ try {
 
 // TRAINING
 if ($cli["training"] == 'true') {
-    $trainer = new WebCrawler();
+    $trainer = new WebCrawler(1);
     echo "\nTraining...\n";
     $trainer->start();
     echo "\n\nSystem Trained.\n\n";
