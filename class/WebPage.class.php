@@ -41,9 +41,9 @@ class WebPage {
 
         // Determine output folder
         if ($this->relevant)
-            $output_filename = REL_PAGES_FOLDER . PAGE_NAME_PREFIX . $this->id;
+            $output_filename = REL_PAGES_FOLDER . PAGE_NAME_PREFIX . ($this->id + MAX_PAGES);
         else
-            $output_filename = IRR_PAGES_FOLDER . PAGE_NAME_PREFIX . $this->id;
+            $output_filename = IRR_PAGES_FOLDER . PAGE_NAME_PREFIX . $this->id ;
 
         // Write to file
         $file_content = "<!-- URL: " . $this->url . " -->\n" . $this->content;
@@ -84,10 +84,8 @@ class WebPage {
     }
 
     private function sameHost($url) {
-        $pizza = $url;
-        $pieces = explode("/", $pizza);
-        $host = $pieces[2];
-        return ($host == $this->host);
+        //return preg_match("/".addslashes($this->host)."/", $url);
+        return (strpos($url, $this->host) === 0);
     }
 
     private function checkAnchors($href) {

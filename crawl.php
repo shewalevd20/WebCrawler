@@ -40,16 +40,28 @@ try {
 
 // TRAINING
 if ($cli["training"] == 'true') {
-    $trainer = new WebCrawler();
     echo "\nTraining...\n";
-    $trainer->start();
-    echo "\n\nSystem Trained.\n\n";
+    WebCrawler::makeDataCleanUp();
+    $relevantTrainer = new WebCrawler(1, MAX_PAGES, DEFAULT_RELEVANT_SEED);
+    
+    $relevantTrainer->start();
     
     $keywords = array();
-    foreach($trainer->getAllKeywords() as $keyword=>$value){
+    foreach($relevantTrainer->getAllKeywords() as $keyword=>$value){
+        $keywords[] = $keyword;
+    }
+    
+    $irrelevantTrainer = new WebCrawler(1, MAX_PAGES, DEFAULT_IRRELEVANT_SEED);
+    
+    $irrelevantTrainer->start();
+    
+    
+    foreach($irrelevantTrainer->getAllKeywords() as $keyword=>$value){
         $keywords[] = $keyword;
     }
     file_put_contents("data/keywords.txt", implode(",", $keywords));
+    
+    echo "\n\nSystem Trained.\n\n";
 }
 
 if($cli["training"] != 'true'){
@@ -60,7 +72,12 @@ if($cli["training"] != 'true'){
         $assoc_keywords[$keyword] = 0;
     }
 }else{
-    $assoc_keywords = $trainer->getAllKeywords();
+    $assoc_keywords = $relevantTrainer->getAllKeywords();
+    foreach($irrelevantTrainer->getAllKeywords() as $keyword=>$value){
+        if(isset($assoc_keywords[$keyword]) && ($assoc_keywords[$keyword] < $value)){
+            $assoc_keywords[$keyword] = $value;
+        }
+    }
 }
 
 // CRAWLING
