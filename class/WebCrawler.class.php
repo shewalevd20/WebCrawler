@@ -51,18 +51,18 @@ class WebCrawler {
         $this->maxpages = $maxpages;
         $this->seed_url = $seed_url;
         $this->pages_counter = 0;
-        $this->counter = -1;
+        $this->counter = 0;
         if (!$this->train) {
             $this->all_keywords = $all_keywords;
-        } else {
+            $this->host = $this->getHost();
+        }else{
+            $this->seed_url = DEFAULT_RELEVANT_SEED;
             $this->seed_url = DEFAULT_RELEVANT_SEED;
         }
-        $this->host = $this->getHost();
     }
 
     public function start() {
         //self::makeDataCleanUp();
-        $this->counter++;
         $this->start_time = time();
         $this->crawl_dfs($this->seed_url);
         foreach ($this->visitedPages as $article) {
@@ -86,16 +86,20 @@ class WebCrawler {
             if (count($this->visitedPages) > 0) {
                 sleep($this->politeness);
             }
-            /*if ($this->train) {
-                
+
+            if ($this->train) {
+                print_r("\n".($this->counter)."\n");
                 if (($this->counter) == (MAX_PAGES / 2)) {
                     print_r("\nswitch hosts\n");
                     $this->seed_url = DEFAULT_IRRELEVANT_SEED;
                     $this->host = DEFAULT_IRRELEVANT_SEED;
                     $this->start();
                 }
-            }*/
+                $this->counter++;
+            }
+            
             $page = new WebPage($url, $this->host);
+            
             $this->visitedPages[] = $page;
             $this->visitedLinks[] = $url;
             $this->pages_counter++;
@@ -107,7 +111,6 @@ class WebCrawler {
             foreach ($page->getAllPageLinks() as $link) {
                 if (!in_array($link, $this->visitedLinks)) {
                     $this->crawl_dfs($link);
-                    
                 }
             }
         }
