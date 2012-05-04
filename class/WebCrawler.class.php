@@ -14,7 +14,7 @@ require_once 'WebPage.class.php';
 require_once 'inc/simple_html_dom.php';
 
 // Crawler constants
-define("MAX_PAGES", 10);
+define("MAX_PAGES", 50);
 define("DEFAULT_SEED", "http://www.theage.com.au/digital-life/mobiles");
 define("DEFAULT_RELEVANT_SEED", "http://www.theage.com.au/digital-life/mobiles");
 define("DEFAULT_IRRELEVANT_SEED", "http://www.theage.com.au");
@@ -56,7 +56,6 @@ class WebCrawler {
     }
 
     public function start() {
-        self::makeDataCleanUp();
         $this->start_time = time();
         $this->crawl_dfs($this->seed_url);
         foreach ($this->visitedPages as $article) {
@@ -80,16 +79,7 @@ class WebCrawler {
             if (count($this->visitedPages) > 0) {
                 sleep($this->politeness);
             }
-
-            if ($this->train) {
-                if (count($this->visitedPages) <= (MAX_PAGES / 2)) {
-                    $page = new WebPage($url, DEFAULT_RELEVANT_SEED);
-                }else{
-                    $page = new WebPage($url, DEFAULT_IRRELEVANT_SEED);
-                }
-            } else {
-                $page = new WebPage($url, $this->host);
-            }
+            $page = new WebPage($url, $this->host);
             $this->visitedPages[] = $page;
             $this->visitedLinks[] = $url;
             $this->pages_counter++;
@@ -203,13 +193,16 @@ class WebCrawler {
     }
 
     public function generateWekaFile() {
-        $lineStr = "@RELATION Articles \n";
-        foreach ($this->all_keywords as $key => $value) {
-            $lineStr .= "@ATTRIBUTE {$key} NUMERIC \n";
+        $lineStr = "";
+        if (count(file_get_contents("data/articles.arff")) >= 1) {
+            $lineStr = "@RELATION Articles \n";
+            foreach ($this->all_keywords as $key => $value) {
+                $lineStr .= "@ATTRIBUTE {$key} NUMERIC \n";
+            }
+            $lineStr .= "@ATTRIBUTE class {Mobile,Not-Mobile}\n";
+            $lineStr .= "@DATA";
+            file_put_contents("data/articles.arff", $lineStr);
         }
-        $lineStr .= "@ATTRIBUTE class {Mobile,Not-Mobile}\n";
-        $lineStr .= "@DATA";
-
         foreach ($this->visitedPages as $page) {
             $lineStr .= "\n";
             foreach ($this->all_keywords as $key => $value) {
@@ -230,7 +223,7 @@ class WebCrawler {
         }
 
         if ($this->train) {
-            file_put_contents("data/articles.arff", $lineStr);
+            file_put_contents("data/articles.arff", $lineStr, FILE_APPEND);
         } else {
             file_put_contents("data/unlabeled.arff", $lineStr);
         }
@@ -239,7 +232,6 @@ class WebCrawler {
     public function getAllKeywords() {
         return $this->all_keywords;
     }
-
 }
 
 ?>

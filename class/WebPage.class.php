@@ -41,7 +41,7 @@ class WebPage {
 
         // Determine output folder
         if ($this->relevant)
-            $output_filename = REL_PAGES_FOLDER . PAGE_NAME_PREFIX . ($this->id);
+            $output_filename = REL_PAGES_FOLDER . PAGE_NAME_PREFIX . ($this->id + MAX_PAGES);
         else
             $output_filename = IRR_PAGES_FOLDER . PAGE_NAME_PREFIX . $this->id ;
 
