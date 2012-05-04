@@ -14,19 +14,18 @@ require_once 'WebPage.class.php';
 require_once 'inc/simple_html_dom.php';
 
 // Crawler constants
-define("MAX_PAGES", 50);
-define("DEFAULT_SEED", "http://www.theage.com.au/digital-life/mobiles");
-define("DEFAULT_RELEVANT_SEED", "http://www.theage.com.au/digital-life/mobiles");
-define("DEFAULT_IRRELEVANT_SEED", "http://www.theage.com.au");
+define("MAX_PAGES", 100);
+define("DEFAULT_SEED", "http://www.theage.com.au/digital-life/mobiles/Mobiles");
 define("DEFAULT_POLITENESS", 30);
 define("URL_OCCURRENCE_WEIGHT", 0.5);
 define("ARTICLE_THRESHOLD", 0.625);
+define("OCCURRENCE_THRESHOLD", 10);
 define("BASE_URL", 'http://localhost:8888/WebCrawler/');
 define("RELEVANT_SECTION", 'mobiles');
 define("REL_PAGES_FOLDER", 'data/pages/relevant/');
 define("IRR_PAGES_FOLDER", 'data/pages/irrelevant/');
 define("PAGE_NAME_PREFIX", 'url_');
-define("WORDS_AMNT", 20);
+define("WORDS_AMNT", 10);
 
 class WebCrawler {
 
@@ -44,18 +43,23 @@ class WebCrawler {
     private $train;
 
     // Main WebCrawler Class constructor
-    function __construct($politeness = DEFAULT_POLITENESS, $maxpages = MAX_PAGES, $seed_url = DEFAULT_SEED, $train = true, $all_keywords = array()) {
-        $this->train = $train;
+    function __construct($politeness = DEFAULT_POLITENESS, $maxpages = MAX_PAGES, $seed_url = DEFAULT_SEED, $train = TRUE, $all_keywords = array()) {
         $this->politeness = $politeness;
         $this->maxpages = $maxpages;
         $this->seed_url = $seed_url;
         $this->host = $this->getHost();
         $this->pages_counter = 0;
+        $this->train = $train;
         if (!$this->train)
             $this->all_keywords = $all_keywords;
     }
 
     public function start() {
+
+
+        // Comment the following line if you want to clean data/pages directory
+        self::makeDataCleanUp();
+
         $this->start_time = time();
         $this->crawl_dfs($this->seed_url);
         foreach ($this->visitedPages as $article) {
@@ -75,10 +79,7 @@ class WebCrawler {
 
     // DFS based crawler function
     private function crawl_dfs($url) {
-        if ((count($this->visitedPages) < $this->maxpages)) {
-            if (count($this->visitedPages) > 0) {
-                sleep($this->politeness);
-            }
+        if ((count($this->visitedPages) < $this->maxpages) && ((time() - $this->start_time) <= $this->politeness)) {
             $page = new WebPage($url, $this->host);
             $this->visitedPages[] = $page;
             $this->visitedLinks[] = $url;
@@ -102,21 +103,20 @@ class WebCrawler {
         $handle = fopen($weka_file, "r");
         if ($handle) {
             while (($buffer = fgets($handle, 256)) !== FALSE) {
-                if (substr_count($buffer, "@data"))
-                    break;
+                if (substr_count($buffer, "@data")) break;
             }
             $classes = array();
             $i = 0;
             while (($buffer = fgets($handle, 256)) !== FALSE) {
                 echo $buffer;
                 $buffer_array = explode(",", $buffer);
-                $relevant = (substr_count($buffer_array[count($buffer_array) - 1], "Not-Mobile") == 1) ? false : true;
+                $relevant = (substr_count($buffer_array[count($buffer_array)-1], "Not-Mobile") == 1) ? false : true;
                 $page = $this->visitedPages[$i];
                 $page->setRelevant($relevant);
                 echo $relevant;
                 $i++;
             }
-            if (!feof($handle)) {
+            if (!feof($handle)) { 
                 echo "Error: unexpected fgets() fail\n";
             }
             fclose($handle);
@@ -125,13 +125,8 @@ class WebCrawler {
 
     private function getHost() {
         $pizza = $this->seed_url;
-        if ($this->train) {
-            echo ("Training Host: " . $this->seed_url . "\n");
-            return $this->seed_url;
-        }
         $pieces = explode("/", $pizza);
         echo ("Host: " . $pieces[2] . "\n");
-
         return $pieces[2];
     }
 
@@ -161,12 +156,12 @@ class WebCrawler {
                 } else {
                     $str = 0;
                 }
-
+                
                 $lineStr .= $str . ",";
             }
-
+            
             if ($counter == 0) {
-                $file_content .= $page->getUrl() . ',' . $lineStr . ($page->isRelevant() ? '1' : '0');
+                $file_content .= $page->getUrl() . ','. $lineStr . ($page->isRelevant() ? '1' : '0');
             } else {
                 $file_content .= "\n" . $page->getUrl() . ',' . $lineStr . ($page->isRelevant() ? '1' : '0');
             }
@@ -193,16 +188,13 @@ class WebCrawler {
     }
 
     public function generateWekaFile() {
-        $lineStr = "";
-        if (count(file_get_contents("data/articles.arff")) >= 1) {
-            $lineStr = "@RELATION Articles \n";
-            foreach ($this->all_keywords as $key => $value) {
-                $lineStr .= "@ATTRIBUTE {$key} NUMERIC \n";
-            }
-            $lineStr .= "@ATTRIBUTE class {Mobile,Not-Mobile}\n";
-            $lineStr .= "@DATA";
-            file_put_contents("data/articles.arff", $lineStr);
+        $lineStr = "@RELATION Articles \n";
+        foreach ($this->all_keywords as $key => $value) {
+            $lineStr .= "@ATTRIBUTE {$key} NUMERIC \n";
         }
+        $lineStr .= "@ATTRIBUTE class {Mobile,Not-Mobile}\n";
+        $lineStr .= "@DATA";
+
         foreach ($this->visitedPages as $page) {
             $lineStr .= "\n";
             foreach ($this->all_keywords as $key => $value) {
@@ -223,7 +215,7 @@ class WebCrawler {
         }
 
         if ($this->train) {
-            file_put_contents("data/articles.arff", $lineStr, FILE_APPEND);
+            file_put_contents("data/articles.arff", $lineStr);
         } else {
             file_put_contents("data/unlabeled.arff", $lineStr);
         }
@@ -232,6 +224,7 @@ class WebCrawler {
     public function getAllKeywords() {
         return $this->all_keywords;
     }
+
 }
 
 ?>
