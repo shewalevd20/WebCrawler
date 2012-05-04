@@ -64,6 +64,7 @@ if (WEKA_READER) {
 }
 
 // read links and classify them from labeled.arff
+$crawler->classifyArticles("data/labeled.arff");
 
 // display links in index.php
 if (FEEDBACK) exec("open " . BASE_URL . "index.php");

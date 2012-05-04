@@ -14,7 +14,7 @@ require_once 'WebPage.class.php';
 require_once 'inc/simple_html_dom.php';
 
 // Crawler constants
-define("MAX_PAGES", 20);
+define("MAX_PAGES", 2);
 define("DEFAULT_SEED", "http://www.theage.com.au/digital-life/mobiles/Mobiles");
 define("DEFAULT_POLITENESS", 30);
 define("URL_OCCURRENCE_WEIGHT", 0.5);
@@ -94,6 +94,32 @@ class WebCrawler {
                     $this->crawl_dfs($link);
                 }
             }
+        }
+    }
+
+    // Code to check whether the page is a mobile page or not 
+    // ** still needs a lot of modifications **
+    public function classifyArticles($weka_file) {
+        $handle = fopen($weka_file, "r");
+        if ($handle) {
+            while (($buffer = fgets($handle, 256)) !== FALSE) {
+                if (substr_count($buffer, "@data")) break;
+            }
+            $classes = array();
+            $i = 0;
+            while (($buffer = fgets($handle, 256)) !== FALSE) {
+                echo $buffer;
+                $buffer_array = explode(",", $buffer);
+                $relevant = ($buffer_array[count($buffer_array)] == "Mobile") ? true : false;
+                $page = $this->visitedPages[$i];
+                $page->setRelevant($relevant);
+                echo $relevant;
+                $i++;
+            }
+            if (!feof($handle)) { 
+                echo "Error: unexpected fgets() fail\n";
+            }
+            fclose($handle);
         }
     }
 
@@ -185,8 +211,6 @@ class WebCrawler {
     public function getAllKeywords() {
         return $this->all_keywords;
     }
-    
-    
 
 }
 

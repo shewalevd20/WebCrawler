@@ -24,10 +24,6 @@ class WebPage {
     private $plainText;
     private $popular_words = array();
     private $linkedPages = array();
-    private static $keywords = array("mobile" => array("text" => 0, "url" => 0, "weight" => 0.125),
-        "android" => array("text" => 0, "url" => 0, "weight" => 0.125),
-        "ios" => array("text" => 0, "url" => 0, "weight" => 0.125),
-        "phone" => array("text" => 0, "url" => 0, "weight" => 0.125));
 
     // Main WebPage Class constructor
     public function __construct($url, $host) {
@@ -107,7 +103,6 @@ class WebPage {
     private function categorizePage() {
         $pizza = $this->url;
         $pieces = explode("/", $pizza);
-        $section = $pieces[2];
         foreach ($pieces as $piece) {
             if ($piece == RELEVANT_SECTION) {
                 $this->relevant = true;
@@ -148,17 +143,9 @@ class WebPage {
     public function isRelevant() {
         return $this->relevant;
     }
-
-    // Code to check whether the page is a mobile page or not 
-    // ** still needs a lot of modifications **
-    public function classifyArticles($weka_file) {
-        $handle = fopen($weka_file, "r");
-        if ($handle) {
-            while (($buffer = fgets($handle, 256)) !== FALSE) {
-                
-            }
-            fclose($handle);
-        }
+    
+    public function setRelevant($tmp) {
+        $this->relevant = $tmp;
     }
 
     public function extractPopularWords() {
