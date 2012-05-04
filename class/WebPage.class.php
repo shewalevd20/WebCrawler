@@ -24,7 +24,11 @@ class WebPage {
     private $plainText;
     private $popular_words = array();
     private $linkedPages = array();
+<<<<<<< HEAD
 
+=======
+    
+>>>>>>> feedback written in articles.arff
     // Main WebPage Class constructor
     public function __construct($url, $host) {
         $this->url = $url;
@@ -188,7 +192,7 @@ class WebPage {
         $this->popular_words = $words;
         return $this->popular_words;
     }
-
+    
     //custom sorting function for associative arrays
     function sort($a, $b) {
         if ($a->getOccurrence() == $b->getOccurrence()) {

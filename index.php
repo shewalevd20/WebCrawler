@@ -32,7 +32,7 @@ foreach($lines as $line){
         <title>Web Crawler - Articles</title>
     </head>
     <body>
-        <form method="POST" action="">
+        <form method="POST" action="getFeedback.php">
             <table>
                 <tr>
                     <th>Article URL</th>
@@ -41,15 +41,27 @@ foreach($lines as $line){
                 <?php
                 $counter = 0;
                 foreach ($pages as $page) {
+                    $url = $page[0];
+                    $isMobile = $page[count($page) - 1];
+                    $occurrences = "";
+                    for($i=1; $i< count($page) - 1; $i++){
+                        if($i==1){
+                            $occurrences .= "{$page[$i]}";
+                        }else{
+                            $occurrences .= ",{$page[$i]}";
+                        }
+                    }
+                    
                 ?>
                     <tr>
                         <td>
-                            <a href="<?php echo $page[0] ?>"><?php echo $page[0] ?></a>
-                            <input type="hidden" name="url[]" value="<?php echo $page[0] ?>"/>
+                            <a href="<?php echo $url ?>"><?php echo $url ?></a>
+                            <input type="hidden" name="url[]" value="<?php echo $url ?>"/>
+                            <input type="hidden" name="occurrences[]" value="<?php echo $occurrences ?>"/>
                         </td>
                         <td>
-                            <input type="radio" name="isMobile[<?php echo $counter; ?>]" value="1" <?php if($page[1]){echo 'checked';}?>/>Yes
-                            <input type="radio" name="isMobile[<?php echo $counter; ?>]" value="0" <?php if(!$page[1]){echo 'checked';}?>/>No
+                            <input type="radio" name="isMobile[<?php echo $counter; ?>]" value="1" <?php if($isMobile){echo 'checked';}?>/>Yes
+                            <input type="radio" name="isMobile[<?php echo $counter; ?>]" value="0" <?php if(!$isMobile){echo 'checked';}?>/>No
                         </td>
                     </tr>
                     <?php

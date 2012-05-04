@@ -16,7 +16,7 @@ include_once 'inc/generate_weka_file.php';
 require_once 'class/WebPage.class.php';
 require_once 'class/WebCrawler.class.php';
 
-define("FEEDBACK", false);
+define("FEEDBACK", true);
 define("GENERATE_ARFF", false);
 define("GENERATE_LINKS_CSV", true);
 define("WEKA_READER", true);
