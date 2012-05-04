@@ -81,7 +81,6 @@ class WebCrawler {
     private function crawl_dfs($url) {
         if ((count($this->visitedPages) < $this->maxpages) && ((time() - $this->start_time) <= $this->politeness)) {
             $page = new WebPage($url, $this->host);
-            $page->checkArticleTopic();
             $this->visitedPages[] = $page;
             $this->visitedLinks[] = $url;
             $this->pages_counter++;

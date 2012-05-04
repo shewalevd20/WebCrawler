@@ -36,6 +36,7 @@ class WebPage {
         $this->visited = false;
         $this->relevant = false;
         $this->content = file_get_contents($this->url);
+        $this->plainText = strtolower($this->content);
     }
 
     public function fetchPage($id) {
@@ -114,8 +115,8 @@ class WebPage {
             }
         }
     }
-    
-    public function getPopularWords($key){
+
+    public function getPopularWords($key) {
         return $this->popular_words[$key];
     }
 
@@ -143,37 +144,21 @@ class WebPage {
     public function setVisited() {
         $this->visited = true;
     }
-    
-    public function isRelevant(){
+
+    public function isRelevant() {
         return $this->relevant;
     }
 
     // Code to check whether the page is a mobile page or not 
     // ** still needs a lot of modifications **
-    public function checkArticleTopic() {
-        $this->plainText = strtolower(file_get_contents($this->url));
-        $weight = 0;
-        $inURL = FALSE;
-        foreach (self::$keywords as $key => $value) {
-            $value["text"] = substr_count(strtolower($this->plainText), $key);
-            $value["url"] = substr_count(strtolower($this->url), $key);
-
-            if ($value["text"] > OCCURRENCE_THRESHOLD) {
-                $weight += $value['weight'];
+    public function classifyArticles($weka_file) {
+        $handle = fopen($weka_file, "r");
+        if ($handle) {
+            while (($buffer = fgets($handle, 256)) !== FALSE) {
+                
             }
-
-            if ($value['url'] > 0) {
-                $inURL = TRUE;
-            }
-
-            self::$keywords[$key] = $value;
+            fclose($handle);
         }
-        if ($inURL) {
-            $weight += URL_OCCURRENCE_WEIGHT;
-        }
-
-        $this->mobile_article = ($weight > ARTICLE_THRESHOLD);
-        //print_r("\n\n" . $this->plainText);
     }
 
     public function extractPopularWords() {
@@ -186,7 +171,7 @@ class WebPage {
         file_put_contents("data/plain_html.html", $text);
 
         $all_words = array();
-        
+
         preg_match_all("/[a-z]{4,}/", $text, $all_words);
         if (count($all_words) > 0) {
             $all_words = $all_words[0];
@@ -207,12 +192,12 @@ class WebPage {
         }
 
         arsort($words);
-        /*foreach($words as $key=>$value){
-            print_r("$key : $value");
-            print_r("\n");
-        }
-        exit;*/
-        
+        /* foreach($words as $key=>$value){
+          print_r("$key : $value");
+          print_r("\n");
+          }
+          exit; */
+
         $this->popular_words = $words;
         return $this->popular_words;
     }
