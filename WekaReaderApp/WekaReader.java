@@ -27,6 +27,7 @@ public class WekaReader {
      */
     public static void main(String[] args) {
         try {
+            System.out.println("Weka Classifier");
             
             BufferedReader reader = new BufferedReader(
                     new FileReader("data/articles.arff"));
@@ -49,7 +50,7 @@ public class WekaReader {
             }
 
             Evaluation eval = new Evaluation(data);
-            eval.crossValidateModel(tree, data, 10, new Random(1));
+            eval.crossValidateModel(tree, data, data.numInstances(), new Random(1));
 
             Instances unlabeled = new Instances(
                     new BufferedReader(
@@ -72,6 +73,7 @@ public class WekaReader {
                     new FileWriter("data/labeled.arff"));            
             
             writer.write(labeled.toString());
+            System.out.println(labeled.toString());
             writer.newLine();
             writer.flush();
             writer.close();

@@ -17,7 +17,6 @@ require_once 'class/WebPage.class.php';
 require_once 'class/WebCrawler.class.php';
 
 define("FEEDBACK", true);
-define("GENERATE_ARFF", false);
 define("GENERATE_LINKS_CSV", true);
 define("WEKA_READER", true);
 
@@ -40,37 +39,58 @@ try {
 }
 
 // TRAINING
-$trainer = new WebCrawler();
-echo "\nTraining...\n";
-$trainer->start();
-echo "\n\nSystem Trained.\n\n";
+if ($cli["training"] == 'true') {
+    $trainer = new WebCrawler();
+    echo "\nTraining...\n";
+    $trainer->start();
+    echo "\n\nSystem Trained.\n\n";
+    
+    $keywords = array();
+    foreach($trainer->getAllKeywords() as $keyword=>$value){
+        $keywords[] = $keyword;
+    }
+    file_put_contents("data/keywords.txt", implode(",", $keywords));
+}
+
+if($cli["training"] != 'true'){
+    $keywords = file_get_contents("data/keywords.txt");
+    $keywords = explode(",", $keywords);
+    $assoc_keywords = array();
+    foreach($keywords as $keyword){
+        $assoc_keywords[$keyword] = 0;
+    }
+}else{
+    $assoc_keywords = $trainer->getAllKeywords();
+}
 
 // CRAWLING
-$crawler = new WebCrawler($cli["politeness"], $cli["maxpages"], $cli["seed_url"], FALSE, $trainer->getAllKeywords());
+$crawler = new WebCrawler($cli["politeness"], $cli["maxpages"], $cli["seed_url"], FALSE, $assoc_keywords);
 echo "\nCrawler started...\n";
 $crawler->start();
 echo "\n\nCrawler finished.\n\n";
 
-// Launch some goodies
-if (GENERATE_LINKS_CSV){
-    $pages = $crawler->getVisitedPages();
-    WebCrawler::writeToFile("data/links.csv", $pages);
-}
-if (GENERATE_ARFF) $crawler->generateWekaFile();
+
+
 if (WEKA_READER) {
-    exec("javac -cp $"."CLASSPATH:WekaReaderApp/weka.jar WekaReaderApp/WekaReader.java");
-    exec("java -cp $"."CLASSPATH:WekaReaderApp/weka.jar WekaReaderApp/WekaReader");
+    exec("javac -cp $" . "CLASSPATH:WekaReaderApp/weka.jar WekaReaderApp/WekaReader.java");
+    exec("java -cp $" . "CLASSPATH:WekaReaderApp/weka.jar WekaReaderApp/WekaReader");
     echo "\nWeka file generated and classified.\n";
 }
 
 // read links and classify them from labeled.arff
 $crawler->classifyArticles("data/labeled.arff");
 
+// Launch some goodies
+if (GENERATE_LINKS_CSV) {
+    $pages = $crawler->getVisitedPages();
+    $crawler->writeToFile("data/links.csv", $pages);
+}
+
 // display links in index.php
-if (FEEDBACK) exec("open " . BASE_URL . "index.php");
+if (FEEDBACK)
+    exec("open " . BASE_URL . "index.php");
 
 // add user feedback to articles.arff
-
 // run training again
 
 echo "\nPROGRAM FINISHED.\n";

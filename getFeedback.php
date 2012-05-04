@@ -1,6 +1,4 @@
 <?php
-print_r($_POST);
-
 $urls = $_POST['url'];
 $isMobile = $_POST['isMobile'];
 $occurrences = $_POST['occurrences'];
@@ -13,4 +11,5 @@ for($i=0; $i<count($urls); $i++){
 
 file_put_contents("data/articles.arff", $articles);
 
+echo "<h2> Thank you for your feedback! </h2>";
 ?>

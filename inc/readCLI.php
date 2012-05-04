@@ -17,13 +17,16 @@ function readCLI() {
         "politeness::",
         "maxpages::",
         "seed_url:",
-        "help::"
+        "help::",
+        "training::"
     );
     $options = getopt($shortopts, $longopts);
     $cli = array("politeness" => $options["politeness"],
-        "maxpages" => $options["maxpages"],
-        "seed_url" => $options["seed_url"],
-        "help" => $options["help"]);
+                 "maxpages" => $options["maxpages"],
+                 "seed_url" => $options["seed_url"],
+                 "help" => $options["help"],
+                 "training" => $options["training"]);
+    if (!isset($options["training"])) $cli["training"] = 'false';
     if (!isset($cli['seed_url'])) {
         throw new NOSeedUrlException("You must specify 'seed_url' in order to start crawling (Usage: '--seed_url='VALUE')\n");
     }

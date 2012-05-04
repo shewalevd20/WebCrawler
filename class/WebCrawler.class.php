@@ -14,7 +14,7 @@ require_once 'WebPage.class.php';
 require_once 'inc/simple_html_dom.php';
 
 // Crawler constants
-define("MAX_PAGES", 2);
+define("MAX_PAGES", 100);
 define("DEFAULT_SEED", "http://www.theage.com.au/digital-life/mobiles/Mobiles");
 define("DEFAULT_POLITENESS", 30);
 define("URL_OCCURRENCE_WEIGHT", 0.5);
@@ -110,7 +110,7 @@ class WebCrawler {
             while (($buffer = fgets($handle, 256)) !== FALSE) {
                 echo $buffer;
                 $buffer_array = explode(",", $buffer);
-                $relevant = ($buffer_array[count($buffer_array)] == "Mobile") ? true : false;
+                $relevant = (substr_count($buffer_array[count($buffer_array)-1], "Not-Mobile") == 1) ? false : true;
                 $page = $this->visitedPages[$i];
                 $page->setRelevant($relevant);
                 echo $relevant;
@@ -143,14 +143,27 @@ class WebCrawler {
 
     /* Static functions */
 
-    public static function writeToFile($filename, $pages) {
+    public function writeToFile($filename, $pages) {
         $file_content = "";
         $counter = 0;
         foreach ($pages as $page) {
+            $lineStr = "";
+            foreach ($this->all_keywords as $key => $value) {
+                $occurrence = $page->getPopularWords($key);
+
+                if (isset($occurrence) && trim($occurrence) != '') {
+                    $str = $occurrence;
+                } else {
+                    $str = 0;
+                }
+                
+                $lineStr .= $str . ",";
+            }
+            
             if ($counter == 0) {
-                $file_content .= $page->getUrl() . ',' . ($page->isRelevant() ? '1' : '0');
+                $file_content .= $page->getUrl() . ','. $lineStr . ($page->isRelevant() ? '1' : '0');
             } else {
-                $file_content .= "\n" . $page->getUrl() . ',' . ($page->isRelevant() ? '1' : '0');
+                $file_content .= "\n" . $page->getUrl() . ',' . $lineStr . ($page->isRelevant() ? '1' : '0');
             }
             $counter++;
         }

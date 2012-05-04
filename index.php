@@ -69,7 +69,7 @@ foreach($lines as $line){
                 }
                 ?>
             </table>
-            <input type="submit" value="Submit" name="Submit"/>
+            <input type="submit" value="Evaluate" name="Submit"/>
         </form>
     </body>
 </html>
