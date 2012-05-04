@@ -24,11 +24,7 @@ class WebPage {
     private $plainText;
     private $popular_words = array();
     private $linkedPages = array();
-<<<<<<< HEAD
 
-=======
-    
->>>>>>> feedback written in articles.arff
     // Main WebPage Class constructor
     public function __construct($url, $host) {
         $this->url = $url;
