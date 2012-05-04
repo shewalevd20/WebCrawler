@@ -19,7 +19,6 @@ class WebPage {
     private $host;
     private $visited;
     private $type;
-    private $mobile_article;
     private $relevant;
     private $plainText;
     private $popular_words = array();
@@ -130,10 +129,6 @@ class WebPage {
 
     public function isVisited() {
         return $this->visited;
-    }
-
-    public function isMobileArticle() {
-        return $this->mobile_article;
     }
 
     public function setVisited() {
