@@ -14,7 +14,7 @@ require_once 'WebPage.class.php';
 require_once 'inc/simple_html_dom.php';
 
 // Crawler constants
-define("MAX_PAGES", 10);
+define("MAX_PAGES", 2);
 define("DEFAULT_SEED", "http://www.theage.com.au/digital-life/mobiles");
 define("DEFAULT_RELEVANT_SEED", "http://www.theage.com.au/digital-life/mobiles");
 define("DEFAULT_IRRELEVANT_SEED", "http://www.theage.com.au");
@@ -42,6 +42,7 @@ class WebCrawler {
     private $pages_counter;
     private $all_keywords = array();
     private $train;
+    private $counter;
 
     // Main WebCrawler Class constructor
     function __construct($politeness = DEFAULT_POLITENESS, $maxpages = MAX_PAGES, $seed_url = DEFAULT_SEED, $train = true, $all_keywords = array()) {
@@ -49,14 +50,19 @@ class WebCrawler {
         $this->politeness = $politeness;
         $this->maxpages = $maxpages;
         $this->seed_url = $seed_url;
-        $this->host = $this->getHost();
         $this->pages_counter = 0;
-        if (!$this->train)
+        $this->counter = 0;
+        if (!$this->train) {
             $this->all_keywords = $all_keywords;
+            $this->host = $this->getHost();
+        }else{
+            $this->seed_url = DEFAULT_RELEVANT_SEED;
+            $this->seed_url = DEFAULT_RELEVANT_SEED;
+        }
     }
 
     public function start() {
-        self::makeDataCleanUp();
+        //self::makeDataCleanUp();
         $this->start_time = time();
         $this->crawl_dfs($this->seed_url);
         foreach ($this->visitedPages as $article) {
@@ -82,14 +88,18 @@ class WebCrawler {
             }
 
             if ($this->train) {
-                if (count($this->visitedPages) <= (MAX_PAGES / 2)) {
-                    $page = new WebPage($url, DEFAULT_RELEVANT_SEED);
-                }else{
-                    $page = new WebPage($url, DEFAULT_IRRELEVANT_SEED);
+                print_r("\n".($this->counter)."\n");
+                if (($this->counter) == (MAX_PAGES / 2)) {
+                    print_r("\nswitch hosts\n");
+                    $this->seed_url = DEFAULT_IRRELEVANT_SEED;
+                    $this->host = DEFAULT_IRRELEVANT_SEED;
+                    $this->start();
                 }
-            } else {
-                $page = new WebPage($url, $this->host);
+                $this->counter++;
             }
+            
+            $page = new WebPage($url, $this->host);
+            
             $this->visitedPages[] = $page;
             $this->visitedLinks[] = $url;
             $this->pages_counter++;
