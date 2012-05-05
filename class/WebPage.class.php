@@ -84,15 +84,15 @@ class WebPage {
     }
 
     private function sameHost($url) {
-        $pizza = $url;
+        /*$pizza = $url;
         $pieces = explode("/", $pizza);
         $host = $pieces[2];
-        return ($host == $this->host);
+        return ($host == $this->host);*/
+        return (strpos(preg_replace("/^http(s){0,1}\:\/\//i",'',$url), $this->host) === 0);
     }
 
     private function checkAnchors($href) {
         $cleanHref = explode("#", $href);
-        //var_dump($cleanHref);
         if ($cleanHref)
             return $cleanHref[0];
         else

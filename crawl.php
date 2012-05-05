@@ -40,9 +40,15 @@ try {
 
 // TRAINING
 if ($cli["training"] == 'true') {
-    $trainer = new WebCrawler(1);
+    $trainer = new WebCrawler(1, MAX_PAGES, DEFAULT_IRR_SEED);
     echo "\nTraining...\n";
+    WebCrawler::makeDataCleanUp();
     $trainer->start();
+    $trainer->setSeedUrl(DEFAULT_REL_SEED);
+    $trainer->setHost($trainer->getHost());
+    $trainer->setPagesCounter(0);
+    $trainer->start();
+    $trainer->generateWekaFile();
     echo "\n\nSystem Trained.\n\n";
     
     $keywords = array();

@@ -14,8 +14,10 @@ require_once 'WebPage.class.php';
 require_once 'inc/simple_html_dom.php';
 
 // Crawler constants
-define("MAX_PAGES", 2);
-define("DEFAULT_SEED", "http://www.theage.com.au/digital-life/mobiles/Mobiles");
+define("MAX_PAGES", 5);
+define("DEFAULT_SEED", "http://www.heraldsun.com.au");
+define("DEFAULT_REL_SEED", "http://www.theage.com.au/digital-life/mobiles");
+define("DEFAULT_IRR_SEED", "http://www.theage.com.au");
 define("DEFAULT_POLITENESS", 30);
 define("URL_OCCURRENCE_WEIGHT", 0.5);
 define("ARTICLE_THRESHOLD", 0.625);
@@ -25,7 +27,7 @@ define("RELEVANT_SECTION", 'mobiles');
 define("REL_PAGES_FOLDER", 'data/pages/relevant/');
 define("IRR_PAGES_FOLDER", 'data/pages/irrelevant/');
 define("PAGE_NAME_PREFIX", 'url_');
-define("WORDS_AMNT", 10);
+define("WORDS_AMNT", 20);
 
 class WebCrawler {
 
@@ -44,21 +46,18 @@ class WebCrawler {
 
     // Main WebCrawler Class constructor
     function __construct($politeness = DEFAULT_POLITENESS, $maxpages = MAX_PAGES, $seed_url = DEFAULT_SEED, $train = TRUE, $all_keywords = array()) {
+        $this->train = $train;
         $this->politeness = $politeness;
         $this->maxpages = $maxpages;
         $this->seed_url = $seed_url;
         $this->host = $this->getHost();
         $this->pages_counter = 0;
-        $this->train = $train;
+        
         if (!$this->train)
             $this->all_keywords = $all_keywords;
     }
 
     public function start() {
-
-
-        // Comment the following line if you want to clean data/pages directory
-        self::makeDataCleanUp();
 
         $this->start_time = time();
         $this->crawl_dfs($this->seed_url);
@@ -72,18 +71,18 @@ class WebCrawler {
             arsort($this->all_keywords);
             $this->all_keywords = array_slice($this->all_keywords, 0, WORDS_AMNT);
         }
-        $this->generateWekaFile();
 
         print_r("\nTotal fetched: " . count($this->visitedPages) . " pages.");
     }
 
     // DFS based crawler function
     private function crawl_dfs($url) {
-        if ((count($this->visitedPages) < $this->maxpages)) {
+        
+        if (($this->pages_counter < $this->maxpages)) {
             if (count($this->visitedPages) > 0) {
                 sleep($this->politeness);
             }
-            
+
             $page = new WebPage($url, $this->host);
             $this->visitedPages[] = $page;
             $this->visitedLinks[] = $url;
@@ -107,31 +106,37 @@ class WebCrawler {
         $handle = fopen($weka_file, "r");
         if ($handle) {
             while (($buffer = fgets($handle, 256)) !== FALSE) {
-                if (substr_count($buffer, "@data")) break;
+                if (substr_count($buffer, "@data"))
+                    break;
             }
             $classes = array();
             $i = 0;
             while (($buffer = fgets($handle, 256)) !== FALSE) {
                 echo $buffer;
                 $buffer_array = explode(",", $buffer);
-                $relevant = (substr_count($buffer_array[count($buffer_array)-1], "Not-Mobile") == 1) ? false : true;
+                $relevant = (substr_count($buffer_array[count($buffer_array) - 1], "Not-Mobile") == 1) ? false : true;
                 $page = $this->visitedPages[$i];
                 $page->setRelevant($relevant);
                 echo $relevant;
                 $i++;
             }
-            if (!feof($handle)) { 
+            if (!feof($handle)) {
                 echo "Error: unexpected fgets() fail\n";
             }
             fclose($handle);
         }
     }
 
-    private function getHost() {
+    public function getHost() {
         $pizza = $this->seed_url;
-        $pieces = explode("/", $pizza);
-        echo ("Host: " . $pieces[2] . "\n");
-        return $pieces[2];
+        if ($this->train) {
+            echo ("Host: " . $pizza . "\n");
+            return preg_replace("/^http(s){0,1}\:\/\//i", '', $pizza);
+        } else {
+            $pieces = explode("/", $pizza);
+            echo ("Host: " . $pieces[2] . "\n");
+            return $pieces[2];
+        }
     }
 
     public function getVisitedPages() {
@@ -160,12 +165,12 @@ class WebCrawler {
                 } else {
                     $str = 0;
                 }
-                
+
                 $lineStr .= $str . ",";
             }
-            
+
             if ($counter == 0) {
-                $file_content .= $page->getUrl() . ','. $lineStr . ($page->isRelevant() ? '1' : '0');
+                $file_content .= $page->getUrl() . ',' . $lineStr . ($page->isRelevant() ? '1' : '0');
             } else {
                 $file_content .= "\n" . $page->getUrl() . ',' . $lineStr . ($page->isRelevant() ? '1' : '0');
             }
@@ -227,6 +232,18 @@ class WebCrawler {
 
     public function getAllKeywords() {
         return $this->all_keywords;
+    }
+    
+    public function setHost($host){
+        $this->host = $host;
+    }
+    
+    public function setSeedUrl($url){
+        $this->seed_url = $url;
+    }
+    
+    public function setPagesCounter($value){
+        $this->pages_counter = $value;
     }
 
 }
