@@ -9,16 +9,12 @@
  * @author Daniel Stankevich s3336691
  */
 
-define("WORDS_AMNT", 20);
-
 class WebPage {
 
     private $id;
     private $url;
     private $content;
     private $host;
-    private $visited;
-    private $type;
     private $relevant;
     private $plainText;
     private $popular_words = array();
@@ -28,7 +24,6 @@ class WebPage {
     public function __construct($url, $host) {
         $this->url = $url;
         $this->host = $host;
-        $this->visited = false;
         $this->relevant = false;
         $this->content = file_get_contents($this->url);
         $this->plainText = strtolower($this->content);
@@ -84,11 +79,12 @@ class WebPage {
     }
 
     private function sameHost($url) {
-        /*$pizza = $url;
-        $pieces = explode("/", $pizza);
-        $host = $pieces[2];
-        return ($host == $this->host);*/
-        return (strpos(preg_replace("/^http(s){0,1}\:\/\//i",'',$url), $this->host) === 0);
+        $pizza = $url;
+        $pieces = explode("?", $pizza);
+        
+        $startWithCheck = strpos(preg_replace("/^http(s){0,1}\:\/\//i",'',$url), $this->host) === 0;
+        
+        return $startWithCheck;
     }
 
     private function checkAnchors($href) {
@@ -121,18 +117,6 @@ class WebPage {
 
     public function getHost() {
         return $this->host;
-    }
-
-    public function getType() {
-        return $this->type;
-    }
-
-    public function isVisited() {
-        return $this->visited;
-    }
-
-    public function setVisited() {
-        $this->visited = true;
     }
 
     public function isRelevant() {

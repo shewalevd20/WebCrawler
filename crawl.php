@@ -40,11 +40,11 @@ try {
 
 // TRAINING
 if ($cli["training"] == 'true') {
-    $trainer = new WebCrawler(1, MAX_PAGES, DEFAULT_IRR_SEED);
+    $trainer = new WebCrawler(TRAINING_POLITENESS, TRAINING_PAGES, TRAINING_REL_SEED);
     echo "\nTraining...\n";
     WebCrawler::makeDataCleanUp();
     $trainer->start();
-    $trainer->setSeedUrl(DEFAULT_REL_SEED);
+    $trainer->setSeedUrl(TRAINING_IRR_SEED);
     $trainer->setHost($trainer->getHost());
     $trainer->setPagesCounter(0);
     $trainer->start();
