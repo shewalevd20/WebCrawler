@@ -13,7 +13,7 @@ require_once 'WebPage.class.php';
 
 // Crawler constants
 define("MAX_PAGES", 5);
-define("TRAINING_PAGES", 100);
+define("TRAINING_PAGES", 50);
 define("DEFAULT_SEED", "http://www.heraldsun.com.au");
 define("TRAINING_REL_SEED", "http://www.theage.com.au/digital-life/mobiles");
 define("TRAINING_IRR_SEED", "http://www.theage.com.au");
@@ -61,13 +61,13 @@ class WebCrawler {
         }
 
         if ($this->train) {
-            arsort($this->all_keywords);
-            $this->all_keywords = array_slice($this->all_keywords, 0, WORDS_AMNT);
+            
         }
 
         print_r("\nTotal fetched: " . count($this->visitedPages) . " pages.");
     }
-
+    
+    
     // DFS based crawler function
     private function crawl_dfs($url) {
         
@@ -227,6 +227,10 @@ class WebCrawler {
         return $this->all_keywords;
     }
     
+    public function setAllKeywords($allKeywords){
+        $this->all_keywords = $allKeywords;
+    }
+
     public function setHost($host){
         $this->host = $host;
     }

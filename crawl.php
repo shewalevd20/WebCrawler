@@ -48,24 +48,28 @@ if ($cli["training"] == 'true') {
     $trainer->setHost($trainer->getHost());
     $trainer->setPagesCounter(0);
     $trainer->start();
+    $allKeywords = $trainer->getAllKeywords();
+    arsort($allKeywords);
+    $sliced_keywords = array_slice($allKeywords, 0, WORDS_AMNT);
+    $trainer->setAllKeywords($sliced_keywords);
     $trainer->generateWekaFile();
     echo "\n\nSystem Trained.\n\n";
-    
+
     $keywords = array();
-    foreach($trainer->getAllKeywords() as $keyword=>$value){
+    foreach ($trainer->getAllKeywords() as $keyword => $value) {
         $keywords[] = $keyword;
     }
     file_put_contents("data/keywords.txt", implode(",", $keywords));
 }
 
-if($cli["training"] != 'true'){
+if ($cli["training"] != 'true') {
     $keywords = file_get_contents("data/keywords.txt");
     $keywords = explode(",", $keywords);
     $assoc_keywords = array();
-    foreach($keywords as $keyword){
+    foreach ($keywords as $keyword) {
         $assoc_keywords[$keyword] = 0;
     }
-}else{
+} else {
     $assoc_keywords = $trainer->getAllKeywords();
 }
 
